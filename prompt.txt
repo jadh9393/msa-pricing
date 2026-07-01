@@ -109,6 +109,9 @@ For EACH extraction unit, search only within its associated sections:
 -----------------------------------
 FIELD EXTRACTION RULES
 -----------------------------------
+FIELD ISOLATION RULE:
+Each metadata field must be sourced independently.
+A value extracted for one field cannot be reused for another field unless explicitly restated in the source text.
 
 1. Product Category
 
@@ -220,8 +223,12 @@ Definition:
 Employment Cost Index increase.
 
 Rules:
-- Look for:
-  - "Employment Cost Index" AND "Commencing on the First Anniversary"
+Look for BOTH exact concepts in the SAME clause:
+- "Employment Cost Index" OR "ECI"
+
+If the clause does not explicitly mention Employment Cost Index (or ECI), return NULL.
+
+Do NOT reuse Annual Price Increase values.
 - Extract numeric value and symbol.
 - If absent, return NULL.
 
@@ -233,8 +240,12 @@ Definition:
 Consumer Price Index increase.
 
 Rules:
-- Look for:
-  - "Consumer Price Index" AND "Commencing on the First Anniversary"
+Look for BOTH exact concepts in the SAME clause:
+- "Consumer Price Index" OR "CPI"
+
+If the clause does not explicitly mention Consumer Price Index (or CPI), return NULL.
+
+Do NOT reuse Annual Price Increase values.
 - Extract numeric value and symbol.
 - If absent, return NULL.
 
