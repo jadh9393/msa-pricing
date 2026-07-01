@@ -466,6 +466,7 @@ OUTPUT FORMAT
         "cpi_increase": null,
         "off_day_delivery_fee": null,
         "split_case_fee": null,
+        "restocking_fee": null,
         "customer_recalls_fee": null,
         "late_payment_fee": null,
         "non_electronic_order_fee": null,
