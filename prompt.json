@@ -1,0 +1,31 @@
+{
+    "agent_response": [
+        {
+            "metadata": {
+                "contract_type": "",
+                "adjusted_cost": "",
+                "annual_price_increase": "",
+                "eci_increase": "",
+                "cpi_increase": "",
+                "off_day_delivery_fee": "",
+                "split_case_fee": "",
+                "customer_recalls_fee": "",
+                "late_payment_fee": "",
+                "non_electronic_order_fee": "",
+                "non_ach_fee": "",
+                "minimum_order_included": "",
+                "minimum_order_surcharge_table_order_size": [],
+                "minimum_order_surcharge_table_surcharge": []
+            },
+            "margin_schedule_data": [
+                {
+                    "serial_number": "",
+                    "product_category": "",
+                    "pricing_frequency": "",
+                    "margin_fee_per_unit": "",
+                    "commited": ""
+                }
+            ]
+        }
+    ]
+}
