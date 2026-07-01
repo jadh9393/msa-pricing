@@ -18,9 +18,30 @@ Your objective is to:
 4. Independently extract specific metadata for each valid contract section.
 5. Return one extraction object per independent contract section.
 
-To ensure accuracy, strictly follow the procedural Steps below and apply the field rules defined in the Attribute Extraction Logic Dictionary.
+To ensure accuracy, strictly follow the procedural steps below and apply the field rules defined in this prompt.
 
 Extract data ONLY according to the rules below.
+
+-----------------------------------
+CONTRACT BOUNDARY DETECTION
+-----------------------------------
+
+A new extraction unit starts when a new contract title or amendment title is detected.
+
+Examples of valid contract boundary titles:
+- MASTER SERVICE AGREEMENT
+- DISTRIBUTION AGREEMENT
+- PARTICIPATION AGREEMENT
+- AMENDMENT AGREEMENT
+- FIRST AMENDMENT
+- SECOND AMENDMENT
+- THIRD AMENDMENT
+- ADDENDUM
+
+Rules:
+- Everything following that title belongs to that extraction unit until the next valid contract title appears.
+- All schedules, clauses, and fees must be associated only with the nearest active extraction unit.
+- Never merge clauses, schedules, or fees across contract boundaries.
 
 -----------------------------------
 EXTRACTION UNIT DEFINITION
@@ -50,7 +71,6 @@ Important:
 
 - Treat every Schedule 1 - Margin Schedule and its associated clauses as an independent extraction unit.
 - If multiple amendments or agreements exist in the same document, extract each independently.
-- Never merge data across separate contract sections.
 - Preserve the order they appear in the document.
 - Each extraction unit must map to one object inside agent_response.
 
@@ -63,6 +83,17 @@ CARDINALITY RULES:
 - If an amendment modifies only fees and does not contain a margin schedule, still create a separate extraction object.
 
 -----------------------------------
+AMENDMENT INHERITANCE RULES
+-----------------------------------
+
+If an Amendment references a prior Agreement:
+
+- Extract ONLY the modified terms explicitly stated in the Amendment.
+- Do NOT copy margin schedule rows from the original agreement unless they are explicitly restated.
+- Do NOT infer unchanged rows from prior agreements.
+- Treat the Amendment as a standalone extraction unit containing only its explicit changes.
+
+-----------------------------------
 DOCUMENT SECTIONS TO SEARCH
 -----------------------------------
 
@@ -73,6 +104,7 @@ For EACH extraction unit, search only within its associated sections:
 3. Other Fees section
 4. Minimum Order Surcharge paragraph
 5. Minimum Order Surcharge table
+6. Amendment fee modification clauses
 
 -----------------------------------
 FIELD EXTRACTION RULES
@@ -99,7 +131,8 @@ Definition:
 Frequency of pricing.
 
 Rules:
-- Capture text exactly (weekly, monthly, etc.)
+- Capture text exactly as written (weekly, monthly, etc.).
+- If absent, return NULL.
 
 Source:
 Schedule 1 - Margin Schedule
@@ -113,10 +146,23 @@ Margin percentage or fee for category.
 
 Rules:
 - Capture numeric value with symbol.
-- Examples:
-  - 10.00%
-  - $2.50/case fee
-- If text says "Per contract with Customer" or no numeric/symbol exists, return NULL.
+- Preserve full unit suffix if present.
+
+Priority order:
+1. Currency values ($)
+2. Percentages (%)
+3. Unit fees (/case, /unit, /lb)
+
+Examples:
+- 10.00%
+- $2.50/case
+- $3.65/case
+
+If text says:
+- "Per contract with Customer"
+- or no numeric/symbol exists
+
+Return NULL.
 
 Source:
 Schedule 1 - Margin Schedule
@@ -129,9 +175,10 @@ Definition:
 Whether category is committed.
 
 Rules:
-- Detect checked checkbox.
+- Detect checked checkbox only.
 - If Yes checked → Y
 - If No checked → N
+- If checkbox not present → NULL
 
 Source:
 Schedule 1 - Margin Schedule
@@ -287,18 +334,75 @@ Rules:
 - Preserve ranges exactly.
 
 -----------------------------------
+AMENDMENT CLAUSE EXTRACTION RULES
+-----------------------------------
+
+If an Amendment modifies pricing without presenting a Schedule 1 table:
+
+1. Treat each pricing modification clause as a synthetic margin schedule row.
+
+2. Extract all explicit fee changes mentioned in amendment clauses.
+
+3. Generate sequential serial numbers starting from 1.
+
+4. Product category mapping:
+   - If clause says "all Product categories", set product_category = "All product categories"
+   - If clause refers to Tier 1 or Tier 2, preserve those exactly.
+
+5. Pricing frequency:
+   - If not explicitly stated, return NULL.
+
+6. Margin/Fee Per Unit:
+   - Capture exact fee or percentage.
+   - Preserve unit suffix if present.
+
+7. Committed:
+   - If not explicitly stated, return NULL.
+
+Examples:
+
+Input:
+"Fee Per Case ... increased by an additional $0.50/case for all Product categories"
+
+Output:
+{
+  "serial_number": "1",
+  "product_category": "All product categories",
+  "pricing_frequency": null,
+  "margin_fee_per_unit": "$0.50/case",
+  "commited": null
+}
+
+Input:
+"Tier 1 Fee Per Case is increased to $3.65"
+
+Output:
+{
+  "serial_number": "2",
+  "product_category": "Tier 1",
+  "pricing_frequency": null,
+  "margin_fee_per_unit": "$3.65/case",
+  "commited": null
+}
+
+-----------------------------------
+NULL STANDARDIZATION
+-----------------------------------
+
+- Use JSON null (without quotes) for missing values.
+- Never use the string "null".
+
+-----------------------------------
 OUTPUT RULES
 -----------------------------------
 
 - Return valid JSON only.
 - Do not explain.
 - Do not infer missing values.
-- Use NULL if data is absent.
 - Preserve exact wording for product category.
 - margin_schedule_data must be an array.
 - Each row in margin schedule must be extracted separately.
 - Multiple serials like 7a, 7b must remain separate.
-- Checkbox detection must be based on checked box only.
 - agent_response must always be an array of extraction units.
 - Each extraction unit must remain independent.
 - Never merge separate amendments into one object.
@@ -307,34 +411,34 @@ OUTPUT RULES
 OUTPUT FORMAT
 -----------------------------------
 
-{
-    "agent_response": [
+[
+    {
+      "metadata": {
+        "contract_type": "",
+        "adjusted_cost": null,
+        "annual_price_increase": null,
+        "eci_increase": null,
+        "cpi_increase": null,
+        "off_day_delivery_fee": null,
+        "split_case_fee": null,
+        "customer_recalls_fee": null,
+        "late_payment_fee": null,
+        "non_electronic_order_fee": null,
+        "non_ach_fee": null,
+        "minimum_order_included": null,
+        "minimum_order_surcharge_table_order_size": [],
+        "minimum_order_surcharge_table_surcharge": []
+      },
+      "margin_schedule_data": [
         {
-            "metadata": {
-                "contract_type": "",
-                "adjusted_cost": "",
-                "annual_price_increase": "",
-                "eci_increase": "",
-                "cpi_increase": "",
-                "off_day_delivery_fee": "",
-                "split_case_fee": "",
-                "customer_recalls_fee": "",
-                "late_payment_fee": "",
-                "non_electronic_order_fee": "",
-                "non_ach_fee": "",
-                "minimum_order_included": "",
-                "minimum_order_surcharge_table_order_size": [],
-                "minimum_order_surcharge_table_surcharge": []
-            },
-            "margin_schedule_data": [
-                {
-                    "serial_number": "",
-                    "product_category": "",
-                    "pricing_frequency": "",
-                    "margin_fee_per_unit": "",
-                    "commited": ""
-                }
-            ]
+          "serial_number": "",
+          "product_category": "",
+          "pricing_frequency": null,
+          "margin_fee_per_unit": null,
+          "commited": null
         }
-    ]
-}
+      ]
+    }
+  ]
+
+```
