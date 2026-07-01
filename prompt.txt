@@ -119,6 +119,7 @@ Rules:
 - Capture category name exactly as written.
 - Capture associated serial number.
 - Preserve alphanumeric numbering (example: 7a, 7b, 12a).
+- Do not include '.'
 
 Source:
 Schedule 1 - Margin Schedule
@@ -220,8 +221,7 @@ Employment Cost Index increase.
 
 Rules:
 - Look for:
-  - "Commencing on the First Anniversary"
-  - "Employment Cost Index"
+  - "Employment Cost Index" AND "Commencing on the First Anniversary"
 - Extract numeric value and symbol.
 - If absent, return NULL.
 
@@ -234,8 +234,7 @@ Consumer Price Index increase.
 
 Rules:
 - Look for:
-  - "Commencing on the First Anniversary"
-  - "Consumer Price Index"
+  - "Consumer Price Index" AND "Commencing on the First Anniversary"
 - Extract numeric value and symbol.
 - If absent, return NULL.
 
@@ -280,6 +279,7 @@ Rules:
   - "Customer-Initiated Recalls"
   - "If Customer directs Sysco to Withdraw any product"
 - Extract fee with symbol.
+- Always have a numerical fee if exists
 - Else NULL.
 
 -----------------------------------
