@@ -246,7 +246,7 @@ Rules:
 - Look for:
   - "Off day"
   - "Off-Day Delivery"
-- Extract fee with symbol.
+- Extract normalized fee value using FEE VALUE NORMALIZATION RULES..
 - Else NULL.
 
 -----------------------------------
@@ -257,7 +257,7 @@ Rules:
 - Look for:
   - "Fee for Split Cases"
   - "Split Case Fee"
-- Extract fee with symbol.
+- Extract normalized fee value using FEE VALUE NORMALIZATION RULES..
 - Else NULL.
 
 -----------------------------------
@@ -267,7 +267,7 @@ Rules:
 Rules:
 - Look for:
   - "Restocking fee"
-- Extract fee with symbol.
+- Extract normalized fee value using FEE VALUE NORMALIZATION RULES..
 - Else NULL.
 
 -----------------------------------
@@ -278,7 +278,7 @@ Rules:
 - Look for:
   - "Customer-Initiated Recalls"
   - "If Customer directs Sysco to Withdraw any product"
-- Extract fee with symbol.
+- Extract normalized fee value using FEE VALUE NORMALIZATION RULES..
 - Always have a numerical fee if exists
 - Else NULL.
 
@@ -289,7 +289,7 @@ Rules:
 Rules:
 - Look for:
   - "Late Payment Fees"
-- Extract fee with symbol.
+- Extract normalized fee value using FEE VALUE NORMALIZATION RULES..
 - Else NULL.
 
 -----------------------------------
@@ -299,7 +299,7 @@ Rules:
 Rules:
 - Look for:
   - "Non Electronic Order fee"
-- Extract fee with symbol.
+- Extract normalized fee value using FEE VALUE NORMALIZATION RULES..
 - Else NULL.
 
 -----------------------------------
@@ -310,7 +310,7 @@ Rules:
 - Look for:
   - "non-ACH"
   - "Non ACH Fees"
-- Extract fee with symbol.
+- Extract normalized fee value using FEE VALUE NORMALIZATION RULES..
 - Else NULL.
 
 -----------------------------------
@@ -332,6 +332,51 @@ Rules:
   - Order Size
   - Small Order Surcharge
 - Preserve ranges exactly.
+
+
+-----------------------------------
+FEE VALUE NORMALIZATION RULES
+-----------------------------------
+
+For all fee-related metadata fields:
+
+- Extract ONLY the numeric value and associated symbol.
+- Remove descriptive words, units, and trailing text.
+- Preserve only:
+  - currency symbol ($)
+  - numeric amount
+  - percentage symbol (%)
+
+Do NOT include:
+- "per case"
+- "per invoice"
+- "per order"
+- "per month"
+- "monthly interest"
+- "handling charge"
+- "service fee"
+- "case fee"
+- "unit fee"
+- any descriptive text after the numeric value
+
+Normalization examples:
+
+"$2.50 per case" → "$2.50"
+"$15.00 per invoice" → "$15.00"
+"1.5% per monthly interest" → "1.5%"
+"10% split case fee" → "10%"
+"$2.50/case fee" → "$2.50"
+
+Special handling:
+
+- If a clause mentions a fee concept but does NOT contain an explicit numeric value, return NULL.
+- Do NOT return descriptive phrases.
+
+Examples:
+
+"then current handling charge" → NULL
+"standard restocking charge applies" → NULL
+"market rate applies" → NULL
 
 -----------------------------------
 AMENDMENT CLAUSE EXTRACTION RULES
