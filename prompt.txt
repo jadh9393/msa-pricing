@@ -23,6 +23,46 @@ To ensure accuracy, strictly follow the procedural steps below and apply the fie
 Extract data ONLY according to the rules below.
 
 -----------------------------------
+DOCUMENT VALIDATION RULES
+-----------------------------------
+
+Before performing any extraction:
+
+1. Assess document readability.
+2. Assess OCR quality.
+3. Assess whether contract titles are legible.
+4. Assess whether Schedule 1 - Margin Schedule is identifiable.
+5. Assess whether table row/column alignment is reliable.
+
+Reject the document if ANY of the following occur:
+
+- Document text is heavily blurred or corrupted
+- OCR output is fragmented or unreadable
+- Contract titles cannot be confidently identified
+- Margin schedule table is illegible
+- Column alignment is ambiguous
+- Product categories cannot be reliably distinguished
+- Numeric fee values cannot be confidently extracted
+- More than 30% of required sections are unreadable
+
+If rejected:
+
+- Set document_status.accepted = false
+- Populate document_status.rejection_reason with a concise human-readable explanation
+- Return extracted_data as an empty array []
+
+Examples:
+
+"Schedule 1 table is too blurred to determine row boundaries"
+"OCR corruption detected in fee clauses"
+"Contract section headers are unreadable"
+"Margin schedule structure is ambiguous"
+
+Do NOT attempt partial extraction if document quality is too poor.
+
+Only proceed with extraction if the document is sufficiently legible.
+
+-----------------------------------
 CONTRACT BOUNDARY DETECTION
 -----------------------------------
 
@@ -36,7 +76,6 @@ Examples of valid contract boundary titles:
 - FIRST AMENDMENT
 - SECOND AMENDMENT
 - THIRD AMENDMENT
-- ADDENDUM
 
 Rules:
 - Everything following that title belongs to that extraction unit until the next valid contract title appears.
@@ -579,49 +618,67 @@ OUTPUT RULES
 -----------------------------------
 
 - Return valid JSON only.
-- Do not explain.
-- Do not infer missing values.
+- Do not explain outside JSON.
 - Preserve exact wording for product category.
-- margin_schedule_data must be an array.
+- Use JSON null for missing values.
+- Never use string "null".
+- extracted_data must always be an array.
 - Each row in margin schedule must be extracted separately.
 - Multiple serials like 7a, 7b must remain separate.
-- agent_response must always be an array of extraction units.
-- Each extraction unit must remain independent.
 - Never merge separate amendments into one object.
+- margin_schedule_data must be an array.
+
+Document acceptance behavior:
+
+IF document is valid:
+- document_status.accepted = true
+- document_status.rejection_reason = ""
+
+IF document is invalid:
+- document_status.accepted = false
+- document_status.rejection_reason must explain why extraction was rejected
+- extracted_data = []
+
+Do not hallucinate missing data from low-quality text.
+Do not infer values that are not explicitly visible.
 
 -----------------------------------
 OUTPUT FORMAT
 -----------------------------------
 
-[
-    {
-      "metadata": {
-        "contract_type": "",
-        "adjusted_cost": null,
-        "annual_price_increase": null,
-        "eci_increase": null,
-        "cpi_increase": null,
-        "off_day_delivery_fee": null,
-        "split_case_fee": null,
-        "restocking_fee": null,
-        "customer_recalls_fee": null,
-        "late_payment_fee": null,
-        "non_electronic_order_fee": null,
-        "non_ach_fee": null,
-        "minimum_order_included": null,
-        "minimum_order_surcharge_table_order_size": [],
-        "minimum_order_surcharge_table_surcharge": []
-      },
-      "margin_schedule_data": [
+{
+    "document_status": {
+        "accepted": false,
+        "rejection_reason": ""
+    },
+    "extracted_data": [
         {
-          "serial_number": "",
-          "product_category": "",
-          "pricing_frequency": null,
-          "margin_fee_per_unit": null,
-          "commited": null
+            "metadata": {
+                "contract_type": "",
+                "adjusted_cost": null,
+                "annual_price_increase": null,
+                "eci_increase": null,
+                "cpi_increase": null,
+                "off_day_delivery_fee": null,
+                "split_case_fee": null,
+                "restocking_fee": null,
+                "customer_recalls_fee": null,
+                "late_payment_fee": null,
+                "non_electronic_order_fee": null,
+                "non_ach_fee": null,
+                "minimum_order_included": null,
+                "minimum_order_surcharge_table_order_size": [],
+                "minimum_order_surcharge_table_surcharge": []
+            },
+            "margin_schedule_data": [
+                {
+                    "serial_number": "",
+                    "product_category": "",
+                    "pricing_frequency": null,
+                    "margin_fee_per_unit": null,
+                    "commited": null
+                }
+            ]
         }
-      ]
-    }
-  ]
-
-```
+    ]
+}
