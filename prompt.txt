@@ -442,6 +442,132 @@ Output:
 }
 
 -----------------------------------
+MARGIN SCHEDULE TABLE PARSING RULES
+-----------------------------------
+
+The Margin Schedule must be parsed row-by-row exactly as presented in the table.
+
+TABLE HIERARCHY RULES:
+
+1. Parent rows may contain nested child rows.
+
+Example:
+
+2. Dairy
+   7162276 Cheese Mozz Shred Whl Milk
+   2856108 Cheese Mozzarella Wm Shrd Prem
+
+In this case:
+
+- The parent row ("Dairy") is a standalone margin schedule row.
+- Each indented child product line beneath it must also be extracted as independent rows.
+- Child rows inherit:
+  - serial number = NULL
+  - pricing frequency from parent
+  - committed flag from parent
+- Child rows must retain their own product category text exactly.
+
+Example output:
+
+{
+  "serial_number": "2",
+  "product_category": "Dairy",
+  "pricing_frequency": "weekly",
+  "margin_fee_per_unit": "12%",
+  "commited": "Y"
+},
+{
+  "serial_number": null,
+  "product_category": "7162276 Cheese Moz Shred Whl Milk",
+  "pricing_frequency": "weekly",
+  "margin_fee_per_unit": "Block Tier #3",
+  "commited": "Y"
+}
+
+-----------------------------------
+
+SPLIT ROW RULES
+
+If one serial number contains multiple subcategories:
+
+Example:
+
+7. a) Canned & Dry
+   b) Bottled Water
+
+Convert into:
+
+7a
+7b
+
+Rules:
+
+- Append lowercase alphabetic suffixes in visual order.
+- Each sub-row must inherit the same committed checkbox value unless explicitly different.
+- Each sub-row must map to its corresponding pricing frequency and margin column in the same visual row.
+
+-----------------------------------
+
+COLUMN ALIGNMENT RULES
+
+For multi-line rows:
+
+Each subcategory must align horizontally with its own:
+
+- pricing frequency
+- margin/fee per unit
+
+Do NOT copy parent values into child rows unless they visually align.
+
+Example:
+
+7a -> monthly -> 10%
+7b -> monthly -> $2.50/case fee
+
+NOT:
+
+7a -> 10%
+7b -> 10%
+
+-----------------------------------
+
+NON-NUMERIC MARGIN VALUES
+
+If Margin/Fee Per Unit contains business terms such as:
+
+- Block Tier #3
+- Per contract with Customer
+
+Preserve exact text.
+
+Do NOT convert to NULL.
+
+These are valid extracted values.
+
+-----------------------------------
+
+CHECKBOX INHERITANCE RULE
+
+If a parent row has one checkbox selection covering multiple child/sub rows:
+
+- All child/sub rows inherit the same committed value.
+
+Example:
+
+9a -> Y
+9b -> Y
+
+-----------------------------------
+
+FOOTNOTE STRIPPING RULE
+
+Remove superscripts and footnote markers from product category labels.
+
+Example:
+
+"Dairy³" → "Dairy"
+
+-----------------------------------
 NULL STANDARDIZATION
 -----------------------------------
 
