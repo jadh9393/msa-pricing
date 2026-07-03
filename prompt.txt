@@ -379,7 +379,7 @@ Rules:
 
 Rules:
 - Extract every row from:
-  - Order Size
+  - Order Size (Replace 'to' by '-' Ex: $0.00 to $800.00 -> $0.00 - $800.00)
   - Small Order Surcharge
 - Preserve ranges exactly.
 
