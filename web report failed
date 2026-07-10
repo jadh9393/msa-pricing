@@ -79,31 +79,38 @@
     <table>
         <thead>
             <tr>
-                <th>Document ID</th>
-                <th>National ID</th>
-                <th>Customer Name</th>
-                <th>Effective Date</th>
-                <th>Expiration Date</th>
+                <th>OT-FileName</th>
+                <th>OT-National ID</th>
+                <th>OT-Site</th>
+                <th>OT-Customer Name</th>
+                <th>OT-Effective Date</th>
+                <th>OT-Expiration Date</th>
+                <th>OT-Modified Date</th>
+                <th>OT-Data ID</th>
+
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             [LL_WEBREPORT_STARTROW /]
             <tr>
+                <td>[LL_REPTAG_4 /]</span></td>
+
+                <td>[LL_REPTAG_2 CAT:'CLM Search':'National ID':DISPLAY /]</td>
+                
+                <td>[LL_REPTAG_2 CAT:'CLM Search':'Lead House - OpCo':DISPLAY /]</td>
+
+                <td>[LL_REPTAG_2 CAT:'CLM Search':'Customer Name':DISPLAY /]</td>
+
+                <td>[LL_REPTAG_2 CAT:"CLM Search":"Effective Date":DISPLAY /]</td>
+
+                <td>[LL_REPTAG_2 CAT:"CLM Search":"Expiration Date":DISPLAY /]</td>
+
+                <td>[LL_REPTAG=modifyDate /]</td>
+
                 <!-- Column 1: DataID -->
                 <td><span class="doc-id">[LL_REPTAG_2 /]</span></td>
 
-                <!-- CLM Search: National ID -->
-                <td>[LL_REPTAG_2 CAT:'CLM Search':'National ID':DISPLAY /]</td>
-
-                <!-- CLM Search: Customer Name -->
-                <td><strong>[LL_REPTAG_2 CAT:"CLM Search":"Customer Name":DISPLAY /]</strong></td>
-
-                <!-- CLM Search: Effective Date -->
-                <td>[LL_REPTAG_2 CAT:"CLM Search":"Effective Date":DISPLAY /]</td>
-
-                <!-- CLM Search: Expiration Date -->
-                <td>[LL_REPTAG_2 CAT:"CLM Search":"Expiration Date":DISPLAY /]</td>
 
                 <td>
                     <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=properties" target="_blank">Properties</a> | 
