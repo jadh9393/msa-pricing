@@ -102,11 +102,11 @@
 
                 <td>[LL_REPTAG_2 CAT:'CLM Search':'Customer Name':DISPLAY /]</td>
 
-                <td>[LL_REPTAG_2 CAT:"CLM Search":"Effective Date":DISPLAY /]</td>
+                <td>[LL_REPTAG_2 CAT:"CLM Search":"Effective Date":DISPLAY DATE:"MM/dd/yyyy HH:mm:ss"/]</td>
 
-                <td>[LL_REPTAG_2 CAT:"CLM Search":"Expiration Date":DISPLAY /]</td>
+                <td>[LL_REPTAG_2 CAT:"CLM Search":"Expiration Date":DISPLAY DATE:"MM/dd/yyyy HH:mm:ss"/]</td>
 
-                <td>[LL_REPTAG=modifyDate /]</td>
+                <td>[LL_REPTAG=modifyDate DATE:"MM/dd/yyyy HH:mm:ss"/]</td>
 
                 <!-- Column 1: DataID -->
                 <td><span class="doc-id">[LL_REPTAG_2 /]</span></td>
