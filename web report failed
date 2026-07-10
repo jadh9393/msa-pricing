@@ -1,0 +1,119 @@
+[LL_WEBREPORT_EXCLUDEHTML /]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Failed Documents - CLM Search Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 30px;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        .report-header {
+            margin-bottom: 25px;
+        }
+        .report-header h2 {
+            margin: 0 0 10px 0;
+            color: #1a365d;
+        }
+        .report-header p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: #1a365d;
+            color: #ffffff;
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        .doc-id {
+            font-family: monospace;
+            font-weight: bold;
+            color: #4a5568;
+            background: #edf2f7;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+        .action-link {
+            color: #3182ce;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .action-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="report-header">
+        <h2>Failed Documents - CLM Search Audit</h2>
+        <p>Generated on: [LL_REPTAG_DATETIME /] | Total Records Found: [LL_REPTAG_INDEXTOTALHITS /]</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Document ID</th>
+                <th>National ID</th>
+                <th>Customer Name</th>
+                <th>Effective Date</th>
+                <th>Expiration Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            [LL_WEBREPORT_STARTROW /]
+            <tr>
+                <!-- Column 1: DataID -->
+                <td><span class="doc-id">[LL_REPTAG_1 /]</span></td>
+
+                <!-- CLM Search: National ID -->
+                <td>[LL_REPTAG_1 CAT:CLM Search:National ID /]</td>
+
+                <!-- CLM Search: Customer Name -->
+                <td><strong>[LL_REPTAG_1 CAT:CLM Search:Customer Name /]</strong></td>
+
+                <!-- CLM Search: Effective Date -->
+                <td>[LL_REPTAG_1 CAT:CLM Search:Effective Date DATE /]</td>
+
+                <!-- CLM Search: Expiration Date -->
+                <td>[LL_REPTAG_1 CAT:CLM Search:Expiration Date DATE /]</td>
+
+                <td>
+                    <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_1 /]&objAction=properties" target="_blank">Properties</a> | 
+                    <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_1 /]&objAction=view" target="_blank">View</a>
+                </td>
+            </tr>
+            [LL_WEBREPORT_ENDROW /]
+        </tbody>
+    </table>
+
+
+</body>
+</html>
