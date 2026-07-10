@@ -91,23 +91,23 @@
             [LL_WEBREPORT_STARTROW /]
             <tr>
                 <!-- Column 1: DataID -->
-                <td><span class="doc-id">[LL_REPTAG_1 /]</span></td>
+                <td><span class="doc-id">[LL_REPTAG_2 /]</span></td>
 
                 <!-- CLM Search: National ID -->
-                <td>[LL_REPTAG_1 CAT:CLM Search:National ID /]</td>
+                <td>[LL_REPTAG_2 CAT:'CLM Search':'National ID':DISPLAY /]</td>
 
                 <!-- CLM Search: Customer Name -->
-                <td><strong>[LL_REPTAG_1 CAT:CLM Search:Customer Name /]</strong></td>
+                <td><strong>[LL_REPTAG_2 CAT:"CLM Search":"Customer Name":DISPLAY /]</strong></td>
 
                 <!-- CLM Search: Effective Date -->
-                <td>[LL_REPTAG_1 CAT:CLM Search:Effective Date DATE /]</td>
+                <td>[LL_REPTAG_2 CAT:"CLM Search":"Effective Date":DISPLAY /]</td>
 
                 <!-- CLM Search: Expiration Date -->
-                <td>[LL_REPTAG_1 CAT:CLM Search:Expiration Date DATE /]</td>
+                <td>[LL_REPTAG_2 CAT:"CLM Search":"Expiration Date":DISPLAY /]</td>
 
                 <td>
-                    <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_1 /]&objAction=properties" target="_blank">Properties</a> | 
-                    <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_1 /]&objAction=view" target="_blank">View</a>
+                    <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=properties" target="_blank">Properties</a> | 
+                    <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=view" target="_blank">View</a>
                 </td>
             </tr>
             [LL_WEBREPORT_ENDROW /]
