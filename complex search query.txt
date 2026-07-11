@@ -1,0 +1,6 @@
+(
+    Attr_35927465_2:"PROCESSING_FAILED"
+    OR
+    Attr_35927465_2:"INGESTION_FAILED"
+) 
+OTCreateDate:qlrange '20260515~20260623'
