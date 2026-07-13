@@ -110,107 +110,6 @@
 </head>
 
 <body>
-<script>
-
-function exportToExcel() {
-
-    try {
-
-        var table = document.getElementById("reportTable");
-
-        if (!table) {
-            alert("Table not found.");
-            return;
-        }
-
-        var rows = [];
-        var headers = [];
-
-        var ths = table.getElementsByTagName("th");
-
-        for (var i = 0; i < ths.length - 1; i++) {
-            headers.push(ths[i].innerText || ths[i].textContent);
-        }
-
-        rows.push(headers);
-
-        var trs = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
-
-        for (var r = 0; r < trs.length; r++) {
-
-            var row = [];
-            var tds = trs[r].getElementsByTagName("td");
-
-            for (var c = 0; c < tds.length - 1; c++) {
-                row.push(
-                    (tds[c].innerText || tds[c].textContent).trim()
-                );
-            }
-
-            if (row.length > 0) {
-                rows.push(row);
-            }
-        }
-
-        var wb = XLSX.utils.book_new();
-
-        var ws = XLSX.utils.aoa_to_sheet(rows);
-
-        var cols = [];
-
-        for (var h = 0; h < headers.length; h++) {
-
-            var max = headers[h].length;
-
-            for (var rr = 0; rr < rows.length; rr++) {
-
-                if (rows[rr][h]) {
-                    max = Math.max(
-                        max,
-                        String(rows[rr][h]).length
-                    );
-                }
-            }
-
-            cols.push({
-                wch: Math.min(max + 5, 60)
-            });
-        }
-
-        ws["!cols"] = cols;
-
-        XLSX.utils.book_append_sheet(
-            wb,
-            ws,
-            "Failed Documents"
-        );
-
-        var d = new Date();
-
-        var yyyy = d.getFullYear();
-        var mm = ("0" + (d.getMonth() + 1)).slice(-2);
-        var dd = ("0" + d.getDate()).slice(-2);
-
-        var fileName =
-            "Failed_Documents_" +
-            yyyy + "-" + mm + "-" + dd +
-            ".xlsx";
-
-        XLSX.writeFile(wb, fileName);
-
-    }
-    catch (e) {
-
-
-        alert(
-            "Excel export failed : " +
-            e.message
-        );
-    }
-}
-
-</script>
-
 
 <div class="search-again">
     <form method="GET"
@@ -271,7 +170,7 @@ function exportToExcel() {
 
 </div>
 
-<table>
+<table id="reportTable">
 
     <thead>
         <tr>
@@ -354,6 +253,106 @@ function exportToExcel() {
     </tbody>
 
 </table>
+
+<script>
+
+function exportToExcel() {
+
+    try {
+
+        var table = document.getElementById("reportTable");
+
+        if (!table) {
+            alert("Table not found.");
+            return;
+        }
+
+        var rows = [];
+        var headers = [];
+
+        var ths = table.getElementsByTagName("th");
+
+        for (var i = 0; i < ths.length - 1; i++) {
+            headers.push(ths[i].innerText || ths[i].textContent);
+        }
+
+        rows.push(headers);
+
+        var trs = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+        for (var r = 0; r < trs.length; r++) {
+
+            var row = [];
+            var tds = trs[r].getElementsByTagName("td");
+
+ 
+
+        for (var c = 0; c < tds.length - 1; c++) {
+            row.push(
+                (tds[c].innerText || tds[c].textContent).trim()
+            );
+        }
+
+            if (row.length > 0) {
+                rows.push(row);
+            }
+        }
+
+        var wb = XLSX.utils.book_new();
+
+        var ws = XLSX.utils.aoa_to_sheet(rows);
+
+        var cols = [];
+
+        for (var h = 0; h < headers.length; h++) {
+
+            var max = headers[h].length;
+
+            for (var rr = 0; rr < rows.length; rr++) {
+
+                if (rows[rr][h]) {
+                    max = Math.max(
+                        max,
+                        String(rows[rr][h]).length
+                    );
+                }
+            }
+
+            cols.push({
+                wch: Math.min(max + 5, 60)
+            });
+        }
+
+        ws["!cols"] = cols;
+
+        XLSX.utils.book_append_sheet(
+            wb,
+            ws,
+            "Failed Documents"
+        );
+
+        var d = new Date();
+
+        var yyyy = d.getFullYear();
+        var mm = ("0" + (d.getMonth() + 1)).slice(-2);
+        var dd = ("0" + d.getDate()).slice(-2);
+
+        var fileName =
+            "Failed_Documents_" +
+            yyyy + "-" + mm + "-" + dd +
+            ".xlsx";
+
+        XLSX.writeFile(wb, fileName);
+
+    }
+    catch (e) {
+        alert(
+            "Excel export failed : " +
+            e.message
+        );
+    }
+}
+</script>
 
 </body>
 </html>
