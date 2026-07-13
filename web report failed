@@ -19,6 +19,17 @@
             margin-bottom: 25px;
         }
 
+        .report-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 16px;
+        }
+
+        .report-header-text {
+            min-width: 0;
+        }
+
         .report-header h2 {
             margin: 0 0 10px 0;
             color: #1a365d;
@@ -94,6 +105,18 @@
             padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .search-again button:hover {
+            background: #153052;
+            transform: translateY(-1px);
+        }
+
+        .search-again button:focus-visible {
+            outline: 2px solid #1a365d;
+            outline-offset: 2px;
         }
 
         .export-btn {
@@ -103,7 +126,31 @@
             padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
-            margin-left: 10px;
+            margin-left: 0;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .export-btn:hover {
+            background: #276749;
+            transform: translateY(-1px);
+        }
+
+        .export-btn:focus-visible {
+            outline: 2px solid #2f855a;
+            outline-offset: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .report-header-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .export-btn {
+                margin-top: 8px;
+            }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -132,33 +179,29 @@
     </div>
 
     <div class="report-header">
+        <div class="report-header-bar">
+            <div class="report-header-text">
+                <h2>Unprocessed Documents</h2>
 
-        <h2>Failed Documents - CLM Search Audit</h2>
+                <div class="filter-info">
+                    Search Date Range:
 
-        <p>
-            Generated on:
-            [LL_REPTAG_DATETIME /]
-            |
-            Total Records Found:
-            [LL_REPTAG_INDEXTOTALHITS /]
-        </p>
+                    <b>[LL_REPTAG_&InputLabel1 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel1 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel1
+                        SUBSTR:1:4 /]</b>
 
-        <div class="filter-info">
-            Search Date Range:
+                    →
 
-            <b>[LL_REPTAG_&InputLabel1 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel1 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel1
-                SUBSTR:1:4 /]</b>
+                    <b>[LL_REPTAG_&InputLabel2 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel2 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel2
+                        SUBSTR:1:4 /]</b>
+                    </br>
+                    Total Records Found: <b>[LL_REPTAG_INDEXTOTALHITS /]</b>
+                </div>
+            </div>
 
-            →
-
-            <b>[LL_REPTAG_&InputLabel2 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel2 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel2
-                SUBSTR:1:4 /]</b>
+            <button class="export-btn" type="button" onclick="exportToExcel()">
+                Export Excel
+            </button>
         </div>
-
-        <button class="export-btn" type="button" onclick="exportToExcel()">
-            Export Excel
-        </button>
-
     </div>
 
     <table id="reportTable">
@@ -173,7 +216,7 @@
                 <th>OT-Expiration Date</th>
                 <th>OT-Modified Date</th>
                 <th>OT-Data ID</th>
-                <th>Failure Reason</th>
+                <th>Unprocessed Reason</th>
                 <th>Actions</th>
             </tr>
         </thead>
