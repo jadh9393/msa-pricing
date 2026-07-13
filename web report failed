@@ -208,15 +208,15 @@
             </td>
 
             <td>
-                [LL_REPTAG_2 CAT:'CLM Search':'Effective Date':DISPLAY /]
+                [LL_REPTAG_2 CAT:'CLM Search':'Effective Date':DISPLAY DATE:'%m/%d/%Y' /]
             </td>
 
             <td>
-                [LL_REPTAG_2 CAT:'CLM Search':'Expiration Date':DISPLAY /]
+                [LL_REPTAG_2 CAT:'CLM Search':'Expiration Date':DISPLAY DATE:'%m/%d/%Y' /]
             </td>
 
             <td>
-                [LL_REPTAG=modifyDate /]
+                [LL_REPTAG=modifyDate DATE:'%m/%d/%Y' /]
             </td>
 
             <td>
@@ -260,89 +260,90 @@ function exportToExcel() {
 
     try {
 
-        var table = document.getElementById("reportTable");
+        var reportTableElement = document.getElementById("reportTable");
 
-        if (!table) {
+        if (!reportTableElement) {
             alert("Table not found.");
             return;
         }
 
-        var rows = [];
-        var headers = [];
+        var worksheetRows = [];
+        var headerRow = [];
 
-        var ths = table.getElementsByTagName("th");
+        var headerCells = reportTableElement.getElementsByTagName("th");
 
-        for (var i = 0; i < ths.length - 1; i++) {
-            headers.push(ths[i].innerText || ths[i].textContent);
+        for (var headerIndex = 0; headerIndex < headerCells.length - 1; headerIndex++) {
+            headerRow.push(headerCells[headerIndex].innerText || headerCells[headerIndex].textContent);
         }
 
-        rows.push(headers);
+        worksheetRows.push(headerRow);
 
-        var trs = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+        var bodyRows = reportTableElement.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
 
-        for (var r = 0; r < trs.length; r++) {
+        for (var bodyRowIndex = 0; bodyRowIndex < bodyRows.length; bodyRowIndex++) {
 
-            var row = [];
-            var tds = trs[r].getElementsByTagName("td");
+            var currentRowValues = [];
+            var dataCells = bodyRows[bodyRowIndex].getElementsByTagName("td");
 
  
 
-        for (var c = 0; c < tds.length - 1; c++) {
-            row.push(
-                (tds[c].innerText || tds[c].textContent).trim()
+        for (var dataCellIndex = 0; dataCellIndex < dataCells.length - 1; dataCellIndex++) {
+
+            currentRowValues.push(
+                (dataCells[dataCellIndex].innerText || dataCells[dataCellIndex].textContent).trim()
             );
         }
 
-            if (row.length > 0) {
-                rows.push(row);
+            if (currentRowValues.length > 0) {
+                worksheetRows.push(currentRowValues);
             }
         }
 
-        var wb = XLSX.utils.book_new();
+        var workbook = XLSX.utils.book_new();
 
-        var ws = XLSX.utils.aoa_to_sheet(rows);
+        var worksheet = XLSX.utils.aoa_to_sheet(worksheetRows);
 
-        var cols = [];
+        var columnWidths = [];
 
-        for (var h = 0; h < headers.length; h++) {
+        for (var columnIndex = 0; columnIndex < headerRow.length; columnIndex++) {
 
-            var max = headers[h].length;
+            var maxColumnWidth = headerRow[columnIndex].length;
 
-            for (var rr = 0; rr < rows.length; rr++) {
+            for (var worksheetRowIndex = 0; worksheetRowIndex < worksheetRows.length; worksheetRowIndex++) {
 
-                if (rows[rr][h]) {
-                    max = Math.max(
-                        max,
-                        String(rows[rr][h]).length
+                if (worksheetRows[worksheetRowIndex][columnIndex]) {
+                    maxColumnWidth = Math.max(
+                        maxColumnWidth,
+                        String(worksheetRows[worksheetRowIndex][columnIndex]).length
                     );
                 }
             }
 
-            cols.push({
-                wch: Math.min(max + 5, 60)
+            columnWidths.push({
+                wch: Math.min(maxColumnWidth + 5, 60)
             });
         }
 
-        ws["!cols"] = cols;
+        worksheet["!cols"] = columnWidths;
 
         XLSX.utils.book_append_sheet(
-            wb,
-            ws,
+            workbook,
+            worksheet,
             "Failed Documents"
         );
 
-        var d = new Date();
+        var currentDate = new Date();
 
-        var yyyy = d.getFullYear();
-        var mm = ("0" + (d.getMonth() + 1)).slice(-2);
-        var dd = ("0" + d.getDate()).slice(-2);
+        var year = currentDate.getFullYear();
+        var month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
+        var day = ("0" + currentDate.getDate()).slice(-2);
 
-        var fileName =
+        var exportFileName =
             "Failed_Documents_" +
-            yyyy + "-" + mm + "-" + dd +
+            year + "-" + month + "-" + day +
             ".xlsx";
 
-        XLSX.writeFile(wb, fileName);
+        XLSX.writeFile(workbook, exportFileName);
 
     }
     catch (e) {
