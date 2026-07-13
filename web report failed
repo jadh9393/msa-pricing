@@ -165,6 +165,7 @@
             <th>OT-Expiration Date</th>
             <th>OT-Modified Date</th>
             <th>OT-Data ID</th>
+            <th>Failure Reason</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -206,7 +207,12 @@
                     [LL_REPTAG_2 /]
                 </span>
             </td>
-
+            
+            <td>
+                [LL_REPTAG_2 CAT:'CLMTracking':'MSA Pricing Status Note':DISPLAY /]
+            </td>
+            
+            
             <td>
                 <a class="action-link"
                    href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=properties"
