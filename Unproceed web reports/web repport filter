@@ -1,0 +1,282 @@
+[LL_WEBREPORT_EXCLUDEHTML /]
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MSA Pricing - Unprocessed Documents Search</title>
+
+    <style>
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6f9;
+            padding: 40px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1a365d;
+        }
+
+        .description {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input[type=date] {
+            padding: 10px;
+            width: 250px;
+            border: 1px solid #cbd5e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #1a365d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #2c5282;
+        }
+
+        .error {
+            color: #c53030;
+            margin-top: 15px;
+            display: none;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>MSA Pricing - Unprocessed Documents Search</h2>
+
+    <div class="description">
+        Select the document creation date range.
+    </div>
+
+    <form id="searchForm">
+
+        <div class="form-row">
+
+            <label for="startDate">
+                Start Date
+            </label>
+
+            <input
+                type="date"
+                id="startDate"
+                required>
+
+        </div>
+
+        <div class="form-row">
+
+            <label for="endDate">
+                End Date
+            </label>
+
+            <input
+                type="date"
+                id="endDate"
+                required>
+
+        </div>
+
+        <button type="submit">
+            Search Failed Documents
+        </button>
+
+        <div id="errorMessage"
+             class="error">
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+
+function yyyymmddToDateInput(value) {
+
+    if (!/^\d{8}$/.test(value || "")) {
+        return "";
+    }
+
+    const year = value.slice(0, 4);
+    const month = value.slice(4, 6);
+    const day = value.slice(6, 8);
+
+    return year + "-" + month + "-" + day;
+}
+
+function applyDateInputsFromQueryParams() {
+
+    const searchParams = new URLSearchParams(window.location.search);
+
+    const startFromQuery = searchParams.get("InputLabel1");
+    const endFromQuery = searchParams.get("InputLabel2");
+
+    const startDateInput = document.getElementById("startDate");
+    const endDateInput = document.getElementById("endDate");
+
+    if (startFromQuery) {
+        const startDateValue = yyyymmddToDateInput(startFromQuery);
+        if (startDateValue) {
+            startDateInput.value = startDateValue;
+        }
+    }
+
+    if (endFromQuery) {
+        const endDateValue = yyyymmddToDateInput(endFromQuery);
+        if (endDateValue) {
+            endDateInput.value = endDateValue;
+        }
+    }
+}
+
+applyDateInputsFromQueryParams();
+
+function parseDateInput(value) {
+
+    const parts = (value || "").split("-");
+
+    if (parts.length !== 3) {
+        return null;
+    }
+
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+
+    if (!year || !month || !day) {
+        return null;
+    }
+
+    return new Date(Date.UTC(year, month - 1, day));
+}
+
+document
+    .getElementById("searchForm")
+    .addEventListener("submit", function (e) {
+
+        e.preventDefault();
+
+        const start =
+            document
+                .getElementById("startDate")
+                .value;
+
+        const end =
+            document
+                .getElementById("endDate")
+                .value;
+
+        const error =
+            document
+                .getElementById("errorMessage");
+
+        error.style.display = "none";
+
+        if (!start || !end) {
+
+            error.innerHTML =
+                "Please select both dates.";
+
+            error.style.display =
+                "block";
+
+            return;
+        }
+
+        if (start > end) {
+
+            error.innerHTML =
+                "Start date cannot be greater than end date.";
+
+            error.style.display =
+                "block";
+
+            return;
+        }
+
+        const startDate = parseDateInput(start);
+        const endDate = parseDateInput(end);
+
+        if (!startDate || !endDate) {
+
+            error.innerHTML =
+                "Invalid date input.";
+
+            error.style.display =
+                "block";
+
+            return;
+        }
+
+        const maxEndDate = new Date(startDate.getTime());
+        maxEndDate.setUTCFullYear(maxEndDate.getUTCFullYear() + 1);
+
+        if (endDate > maxEndDate) {
+
+            error.innerHTML =
+                "Date range cannot be more than 1 year.";
+
+            error.style.display =
+                "block";
+
+            return;
+        }
+
+        const startFormatted =
+            start.replaceAll("-", "");
+
+        const endFormatted =
+            end.replaceAll("-", "");
+
+        window.location.href =
+            "cs.exe"
+            + "?func=ll"
+            + "&objId=35944543"
+            + "&objAction=RunReport"
+            + "&InputLabel1="
+            + startFormatted
+            + "&InputLabel2="
+            + endFormatted;
+
+    });
+
+</script>
+
+</body>
+</html>

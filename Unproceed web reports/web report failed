@@ -5,7 +5,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Failed Documents - CLM Search Report</title>
+    <title>MSA Pricing - Unprocessed Documents Report</title>
 
     <style>
         body {
@@ -181,7 +181,7 @@
     <div class="report-header">
         <div class="report-header-bar">
             <div class="report-header-text">
-                <h2>Unprocessed Documents</h2>
+                <h2>MSA Pricing - Unprocessed Documents</h2>
 
                 <div class="filter-info">
                     Search Date Range:
