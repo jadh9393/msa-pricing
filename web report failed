@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Failed Documents - CLM Search Report</title>
@@ -41,7 +42,7 @@
             background: #ffffff;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         th {
@@ -94,7 +95,7 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        
+
         .export-btn {
             background: #2f855a;
             color: white;
@@ -111,249 +112,237 @@
 
 <body>
 
-<div class="search-again">
-    <form method="GET"
-          action="cs.exe">
-    
-        <input type="hidden"
-               name="func"
-               value="ll">
-    
-        <input type="hidden"
-               name="objId"
-               value="35950584">
-    
-        <input type="hidden"
-               name="objAction"
-               value="RunReport">
-    
-        <button type="submit">
-            Change Date Filter
+    <div class="search-again">
+        <form method="GET" action="cs.exe">
+
+            <input type="hidden" name="func" value="ll">
+
+            <input type="hidden" name="objId" value="35950584">
+
+            <input type="hidden" name="objAction" value="RunReport">
+
+            <button type="submit">
+                Change Date Filter
+            </button>
+
+            <input type="hidden" name="InputLabel1" value="[LL_REPTAG_&InputLabel1 /]">
+
+            <input type="hidden" name="InputLabel2" value="[LL_REPTAG_&InputLabel2 /]">
+        </form>
+    </div>
+
+    <div class="report-header">
+
+        <h2>Failed Documents - CLM Search Audit</h2>
+
+        <p>
+            Generated on:
+            [LL_REPTAG_DATETIME /]
+            |
+            Total Records Found:
+            [LL_REPTAG_INDEXTOTALHITS /]
+        </p>
+
+        <div class="filter-info">
+            Search Date Range:
+
+            <b>[LL_REPTAG_&InputLabel1 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel1 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel1
+                SUBSTR:1:4 /]</b>
+
+            →
+
+            <b>[LL_REPTAG_&InputLabel2 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel2 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel2
+                SUBSTR:1:4 /]</b>
+        </div>
+
+        <button class="export-btn" type="button" onclick="exportToExcel()">
+            Export Excel
         </button>
-    
-        <input type="hidden"
-           name="InputLabel1"
-           value="[LL_REPTAG_&InputLabel1 /]">
-    
-    <input type="hidden"
-           name="InputLabel2"
-           value="[LL_REPTAG_&InputLabel2 /]">
-    </form>
-</div>
 
-<div class="report-header">
+    </div>
 
-    <h2>Failed Documents - CLM Search Audit</h2>
+    <table id="reportTable">
 
-    <p>
-        Generated on:
-        [LL_REPTAG_DATETIME /]
-        |
-        Total Records Found:
-        [LL_REPTAG_INDEXTOTALHITS /]
-    </p>
+        <thead>
+            <tr>
+                <th>OT-FileName</th>
+                <th>OT-National ID</th>
+                <th>OT-Site</th>
+                <th>OT-Customer Name</th>
+                <th>OT-Effective Date</th>
+                <th>OT-Expiration Date</th>
+                <th>OT-Modified Date</th>
+                <th>OT-Data ID</th>
+                <th>Failure Reason</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
 
-<div class="filter-info">
-    Search Date Range:
+        <tbody>
 
-    <b>[LL_REPTAG_&InputLabel1 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel1 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel1 SUBSTR:1:4 /]</b>
+            [LL_WEBREPORT_STARTROW /]
 
-    →
+            <tr>
 
-    <b>[LL_REPTAG_&InputLabel2 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel2 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel2 SUBSTR:1:4 /]</b>
-</div>
+                <td>[LL_REPTAG_4 /]</td>
 
-<button class="export-btn" type="button"
-        onclick="exportToExcel()">
-    Export Excel
-</button>
+                <td>
+                    [LL_REPTAG_2 CAT:'CLM Search':'National ID':DISPLAY /]
+                </td>
 
-</div>
+                <td>
+                    [LL_REPTAG_2 CAT:'CLM Search':'Lead House - OpCo':DISPLAY /]
+                </td>
 
-<table id="reportTable">
+                <td>
+                    [LL_REPTAG_2 CAT:'CLM Search':'Customer Name':DISPLAY /]
+                </td>
 
-    <thead>
-        <tr>
-            <th>OT-FileName</th>
-            <th>OT-National ID</th>
-            <th>OT-Site</th>
-            <th>OT-Customer Name</th>
-            <th>OT-Effective Date</th>
-            <th>OT-Expiration Date</th>
-            <th>OT-Modified Date</th>
-            <th>OT-Data ID</th>
-            <th>Failure Reason</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
+                <td>
+                    [LL_REPTAG_2 CAT:'CLM Search':'Effective Date':DISPLAY DATE:'%m/%d/%Y' /]
+                </td>
 
-    <tbody>
+                <td>
+                    [LL_REPTAG_2 CAT:'CLM Search':'Expiration Date':DISPLAY DATE:'%m/%d/%Y' /]
+                </td>
 
-        [LL_WEBREPORT_STARTROW /]
+                <td>
+                    [LL_REPTAG=modifyDate DATE:'%m/%d/%Y' /]
+                </td>
 
-        <tr>
+                <td>
+                    <span class="doc-id">
+                        [LL_REPTAG_2 /]
+                    </span>
+                </td>
 
-            <td>[LL_REPTAG_4 /]</td>
+                <td>
+                    [LL_REPTAG_2 CAT:'CLMTracking':'MSA Pricing Status Note':DISPLAY /]
+                </td>
 
-            <td>
-                [LL_REPTAG_2 CAT:'CLM Search':'National ID':DISPLAY /]
-            </td>
 
-            <td>
-                [LL_REPTAG_2 CAT:'CLM Search':'Lead House - OpCo':DISPLAY /]
-            </td>
+                <td>
+                    <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=properties"
+                        target="_blank">
+                        Properties
+                    </a>
 
-            <td>
-                [LL_REPTAG_2 CAT:'CLM Search':'Customer Name':DISPLAY /]
-            </td>
+                    |
 
-            <td>
-                [LL_REPTAG_2 CAT:'CLM Search':'Effective Date':DISPLAY DATE:'%m/%d/%Y' /]
-            </td>
+                    <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=view" target="_blank">
+                        View
+                    </a>
+                </td>
 
-            <td>
-                [LL_REPTAG_2 CAT:'CLM Search':'Expiration Date':DISPLAY DATE:'%m/%d/%Y' /]
-            </td>
+            </tr>
 
-            <td>
-                [LL_REPTAG=modifyDate DATE:'%m/%d/%Y' /]
-            </td>
+            [LL_WEBREPORT_ENDROW /]
 
-            <td>
-                <span class="doc-id">
-                    [LL_REPTAG_2 /]
-                </span>
-            </td>
-            
-            <td>
-                [LL_REPTAG_2 CAT:'CLMTracking':'MSA Pricing Status Note':DISPLAY /]
-            </td>
-            
-            
-            <td>
-                <a class="action-link"
-                   href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=properties"
-                   target="_blank">
-                    Properties
-                </a>
+        </tbody>
 
-                |
+    </table>
 
-                <a class="action-link"
-                   href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=view"
-                   target="_blank">
-                    View
-                </a>
-            </td>
+    <script>
 
-        </tr>
+        function exportToExcel() {
 
-        [LL_WEBREPORT_ENDROW /]
+            try {
 
-    </tbody>
+                const reportTableElement = document.getElementById("reportTable");
 
-</table>
-
-<script>
-
-function exportToExcel() {
-
-    try {
-
-        var reportTableElement = document.getElementById("reportTable");
-
-        if (!reportTableElement) {
-            alert("Table not found.");
-            return;
-        }
-
-        var worksheetRows = [];
-        var headerRow = [];
-
-        var headerCells = reportTableElement.getElementsByTagName("th");
-
-        for (var headerIndex = 0; headerIndex < headerCells.length - 1; headerIndex++) {
-            headerRow.push(headerCells[headerIndex].innerText || headerCells[headerIndex].textContent);
-        }
-
-        worksheetRows.push(headerRow);
-
-        var bodyRows = reportTableElement.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
-
-        for (var bodyRowIndex = 0; bodyRowIndex < bodyRows.length; bodyRowIndex++) {
-
-            var currentRowValues = [];
-            var dataCells = bodyRows[bodyRowIndex].getElementsByTagName("td");
-
- 
-
-        for (var dataCellIndex = 0; dataCellIndex < dataCells.length - 1; dataCellIndex++) {
-
-            currentRowValues.push(
-                (dataCells[dataCellIndex].innerText || dataCells[dataCellIndex].textContent).trim()
-            );
-        }
-
-            if (currentRowValues.length > 0) {
-                worksheetRows.push(currentRowValues);
-            }
-        }
-
-        var workbook = XLSX.utils.book_new();
-
-        var worksheet = XLSX.utils.aoa_to_sheet(worksheetRows);
-
-        var columnWidths = [];
-
-        for (var columnIndex = 0; columnIndex < headerRow.length; columnIndex++) {
-
-            var maxColumnWidth = headerRow[columnIndex].length;
-
-            for (var worksheetRowIndex = 0; worksheetRowIndex < worksheetRows.length; worksheetRowIndex++) {
-
-                if (worksheetRows[worksheetRowIndex][columnIndex]) {
-                    maxColumnWidth = Math.max(
-                        maxColumnWidth,
-                        String(worksheetRows[worksheetRowIndex][columnIndex]).length
-                    );
+                if (!reportTableElement) {
+                    alert("Table not found.");
+                    return;
                 }
+
+                const worksheetRows = [];
+                const headerRow = [];
+
+                const headerCells = reportTableElement.getElementsByTagName("th");
+
+                for (let headerIndex = 0; headerIndex < headerCells.length - 1; headerIndex++) {
+                    headerRow.push(headerCells[headerIndex].innerText || headerCells[headerIndex].textContent);
+                }
+
+                worksheetRows.push(headerRow);
+
+                const tableBody = reportTableElement.getElementsByTagName("tbody")[0];
+                const bodyRows = tableBody.getElementsByTagName("tr");
+
+                for (let bodyRowIndex = 0; bodyRowIndex < bodyRows.length; bodyRowIndex++) {
+
+                    const currentRowValues = [];
+                    const dataCells = bodyRows[bodyRowIndex].getElementsByTagName("td");
+
+
+                    for (let dataCellIndex = 0; dataCellIndex < dataCells.length - 1; dataCellIndex++) {
+
+                        currentRowValues.push(
+                            (dataCells[dataCellIndex].innerText || dataCells[dataCellIndex].textContent).trim()
+                        );
+                    }
+
+                    if (currentRowValues.length > 0) {
+                        worksheetRows.push(currentRowValues);
+                    }
+                }
+
+                const workbook = XLSX.utils.book_new();
+
+                const worksheet = XLSX.utils.aoa_to_sheet(worksheetRows);
+
+                const columnWidths = [];
+
+                for (let columnIndex = 0; columnIndex < headerRow.length; columnIndex++) {
+
+                    let maxColumnWidth = headerRow[columnIndex].length;
+
+                    for (let worksheetRowIndex = 0; worksheetRowIndex < worksheetRows.length; worksheetRowIndex++) {
+
+                        if (worksheetRows[worksheetRowIndex][columnIndex]) {
+                            maxColumnWidth = Math.max(
+                                maxColumnWidth,
+                                String(worksheetRows[worksheetRowIndex][columnIndex]).length
+                            );
+                        }
+                    }
+
+                    columnWidths.push({
+                        wch: Math.min(maxColumnWidth + 5, 60)
+                    });
+                }
+
+                worksheet["!cols"] = columnWidths;
+
+                XLSX.utils.book_append_sheet(
+                    workbook,
+                    worksheet,
+                    "Failed Documents"
+                );
+
+                const currentDate = new Date();
+
+                const year = currentDate.getFullYear();
+                const month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
+                const day = ("0" + currentDate.getDate()).slice(-2);
+
+                const exportFileName =
+                    "Failed_Documents_" +
+                    year + "-" + month + "-" + day +
+                    ".xlsx";
+
+                XLSX.writeFile(workbook, exportFileName);
+
             }
-
-            columnWidths.push({
-                wch: Math.min(maxColumnWidth + 5, 60)
-            });
+            catch (e) {
+                alert(
+                    "Excel export failed : " +
+                    e.message
+                );
+            }
         }
-
-        worksheet["!cols"] = columnWidths;
-
-        XLSX.utils.book_append_sheet(
-            workbook,
-            worksheet,
-            "Failed Documents"
-        );
-
-        var currentDate = new Date();
-
-        var year = currentDate.getFullYear();
-        var month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
-        var day = ("0" + currentDate.getDate()).slice(-2);
-
-        var exportFileName =
-            "Failed_Documents_" +
-            year + "-" + month + "-" + day +
-            ".xlsx";
-
-        XLSX.writeFile(workbook, exportFileName);
-
-    }
-    catch (e) {
-        alert(
-            "Excel export failed : " +
-            e.message
-        );
-    }
-}
-</script>
+    </script>
 
 </body>
+
 </html>
