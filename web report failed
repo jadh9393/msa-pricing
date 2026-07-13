@@ -1,9 +1,11 @@
 [LL_WEBREPORT_EXCLUDEHTML /]
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Failed Documents - CLM Search Report</title>
+
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -11,18 +13,28 @@
             background-color: #f4f6f9;
             color: #333;
         }
+
         .report-header {
             margin-bottom: 25px;
         }
+
         .report-header h2 {
             margin: 0 0 10px 0;
             color: #1a365d;
         }
+
         .report-header p {
             margin: 0;
             color: #666;
             font-size: 14px;
         }
+
+        .filter-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #444;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -31,6 +43,7 @@
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
+
         th {
             background-color: #1a365d;
             color: #ffffff;
@@ -38,19 +51,18 @@
             padding: 14px 16px;
             font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
+
         td {
             padding: 14px 16px;
             border-bottom: 1px solid #e2e8f0;
             font-size: 14px;
         }
-        tr:last-child td {
-            border-bottom: none;
-        }
+
         tr:hover {
             background-color: #f8fafc;
         }
+
         .doc-id {
             font-family: monospace;
             font-weight: bold;
@@ -59,68 +71,165 @@
             padding: 3px 6px;
             border-radius: 4px;
         }
+
         .action-link {
             color: #3182ce;
             text-decoration: none;
             font-weight: 600;
         }
+
         .action-link:hover {
             text-decoration: underline;
         }
+
+        .search-again {
+            margin-bottom: 20px;
+        }
+
+        .search-again button {
+            background: #1a365d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
+
 <body>
 
-    <div class="report-header">
-        <h2>Failed Documents - CLM Search Audit</h2>
-        <p>Generated on: [LL_REPTAG_DATETIME /] | Total Records Found: [LL_REPTAG_INDEXTOTALHITS /]</p>
-    </div>
+<div class="search-again">
+    <form method="GET"
+          action="cs.exe">
     
-    <table>
-        <thead>
-            <tr>
-                <th>OT-FileName</th>
-                <th>OT-National ID</th>
-                <th>OT-Site</th>
-                <th>OT-Customer Name</th>
-                <th>OT-Effective Date</th>
-                <th>OT-Expiration Date</th>
-                <th>OT-Modified Date</th>
-                <th>OT-Data ID</th>
+        <input type="hidden"
+               name="func"
+               value="ll">
+    
+        <input type="hidden"
+               name="objId"
+               value="35950584">
+    
+        <input type="hidden"
+               name="objAction"
+               value="RunReport">
+    
+        <button type="submit">
+            Change Date Filter
+        </button>
+    
+        <input type="hidden"
+           name="InputLabel1"
+           value="[LL_REPTAG_&InputLabel1 /]">
+    
+    <input type="hidden"
+           name="InputLabel2"
+           value="[LL_REPTAG_&InputLabel2 /]">
+    </form>
+</div>
 
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            [LL_WEBREPORT_STARTROW /]
-            <tr>
-                <td>[LL_REPTAG_4 /]</span></td>
+<div class="report-header">
 
-                <td>[LL_REPTAG_2 CAT:'CLM Search':'National ID':DISPLAY /]</td>
-                
-                <td>[LL_REPTAG_2 CAT:'CLM Search':'Lead House - OpCo':DISPLAY /]</td>
+    <h2>Failed Documents - CLM Search Audit</h2>
 
-                <td>[LL_REPTAG_2 CAT:'CLM Search':'Customer Name':DISPLAY /]</td>
+    <p>
+        Generated on:
+        [LL_REPTAG_DATETIME /]
+        |
+        Total Records Found:
+        [LL_REPTAG_INDEXTOTALHITS /]
+    </p>
 
-                <td>[LL_REPTAG_2 CAT:"CLM Search":"Effective Date":DISPLAY DATE:"MM/dd/yyyy HH:mm:ss"/]</td>
+<div class="filter-info">
+    Search Date Range:
 
-                <td>[LL_REPTAG_2 CAT:"CLM Search":"Expiration Date":DISPLAY DATE:"MM/dd/yyyy HH:mm:ss"/]</td>
+    <b>[LL_REPTAG_&InputLabel1 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel1 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel1 SUBSTR:1:4 /]</b>
 
-                <td>[LL_REPTAG=modifyDate DATE:"MM/dd/yyyy HH:mm:ss"/]</td>
+    →
 
-                <!-- Column 1: DataID -->
-                <td><span class="doc-id">[LL_REPTAG_2 /]</span></td>
+    <b>[LL_REPTAG_&InputLabel2 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel2 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel2 SUBSTR:1:4 /]</b>
+</div>
 
+</div>
 
-                <td>
-                    <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=properties" target="_blank">Properties</a> | 
-                    <a class="action-link" href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=view" target="_blank">View</a>
-                </td>
-            </tr>
-            [LL_WEBREPORT_ENDROW /]
-        </tbody>
-    </table>
+<table>
 
+    <thead>
+        <tr>
+            <th>OT-FileName</th>
+            <th>OT-National ID</th>
+            <th>OT-Site</th>
+            <th>OT-Customer Name</th>
+            <th>OT-Effective Date</th>
+            <th>OT-Expiration Date</th>
+            <th>OT-Modified Date</th>
+            <th>OT-Data ID</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        [LL_WEBREPORT_STARTROW /]
+
+        <tr>
+
+            <td>[LL_REPTAG_4 /]</td>
+
+            <td>
+                [LL_REPTAG_2 CAT:'CLM Search':'National ID':DISPLAY /]
+            </td>
+
+            <td>
+                [LL_REPTAG_2 CAT:'CLM Search':'Lead House - OpCo':DISPLAY /]
+            </td>
+
+            <td>
+                [LL_REPTAG_2 CAT:'CLM Search':'Customer Name':DISPLAY /]
+            </td>
+
+            <td>
+                [LL_REPTAG_2 CAT:'CLM Search':'Effective Date':DISPLAY /]
+            </td>
+
+            <td>
+                [LL_REPTAG_2 CAT:'CLM Search':'Expiration Date':DISPLAY /]
+            </td>
+
+            <td>
+                [LL_REPTAG=modifyDate /]
+            </td>
+
+            <td>
+                <span class="doc-id">
+                    [LL_REPTAG_2 /]
+                </span>
+            </td>
+
+            <td>
+                <a class="action-link"
+                   href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=properties"
+                   target="_blank">
+                    Properties
+                </a>
+
+                |
+
+                <a class="action-link"
+                   href="cs.exe?func=ll&objId=[LL_REPTAG_2 /]&objAction=view"
+                   target="_blank">
+                    View
+                </a>
+            </td>
+
+        </tr>
+
+        [LL_WEBREPORT_ENDROW /]
+
+    </tbody>
+
+</table>
 
 </body>
 </html>
