@@ -1,0 +1,11 @@
+{
+  "actualRows": [LL_REPTAG_TOTALROWS /],
+  "filteredRows": [LL_REPTAG_TOTALSOURCEROWS /],
+  "myRows": [
+[LL_WEBREPORT_STARTROW /][LL_WEBREPORT_IF "[LL_REPTAG_ROWNUM /]" != "1" /],[LL_WEBREPORT_ENDIF /]
+    {"DataId": [LL_REPTAG=DATAID /]}
+[LL_WEBREPORT_ENDROW /]
+  ],
+  "sourceID": [LL_REPTAG_SOURCEID /],
+  "totalRows": [LL_REPTAG_INDEXTOTALHITS /]
+}
