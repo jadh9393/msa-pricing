@@ -154,6 +154,7 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.9/axios.min.js"></script>
 
 </head>
 
@@ -198,7 +199,7 @@
                 </div>
             </div>
 
-            <button class="export-btn" type="button" onclick="exportToExcel()">
+            <button id="exportBtn" class="export-btn" type="button" onclick="exportToExcel()">
                 Export Excel
             </button>
         </div>
@@ -288,101 +289,156 @@
     <script>
 
         function exportToExcel() {
+            var exportBtn =
+                document.getElementById("exportBtn");
 
-            try {
+            if (typeof XLSX === "undefined") {
+                alert("XLSX library not loaded.");
+                return;
+            }
 
-                const reportTableElement = document.getElementById("reportTable");
+            if (typeof axios === "undefined") {
+                alert("Axios library not loaded.");
+                return;
+            }
 
-                if (!reportTableElement) {
-                    alert("Table not found.");
-                    return;
-                }
+            exportBtn.disabled = true;
+            exportBtn.innerText = "Preparing export...";
 
-                const worksheetRows = [];
-                const headerRow = [];
+            var startDate =
+                "[LL_REPTAG_&InputLabel1 /]";
 
-                const headerCells = reportTableElement.getElementsByTagName("th");
+            var endDate =
+                "[LL_REPTAG_&InputLabel2 /]";
 
-                for (let headerIndex = 0; headerIndex < headerCells.length - 1; headerIndex++) {
-                    headerRow.push(headerCells[headerIndex].innerText || headerCells[headerIndex].textContent);
-                }
+            var allRows = [];
+            var startAt = 1;
+            var page = 1;
+            var totalRows = null;
 
-                worksheetRows.push(headerRow);
+            function resetExportButton() {
+                exportBtn.innerText =
+                    "Export Excel";
+                exportBtn.disabled = false;
+            }
 
-                const tableBody = reportTableElement.getElementsByTagName("tbody")[0];
-                const bodyRows = tableBody.getElementsByTagName("tr");
+            function failExport(message) {
+                resetExportButton();
+                alert(message);
+            }
 
-                for (let bodyRowIndex = 0; bodyRowIndex < bodyRows.length; bodyRowIndex++) {
+            function requestNextPage() {
+                var url =
+                    "cs.exe?func=ll" +
+                    "&objId=35942940" +
+                    "&objAction=RunReport" +
+                    "&page=" + page +
+                    "&startAt=" + startAt +
+                    "&InputLabel1=" + encodeURIComponent(startDate) +
+                    "&InputLabel2=" + encodeURIComponent(endDate);
 
-                    const currentRowValues = [];
-                    const dataCells = bodyRows[bodyRowIndex].getElementsByTagName("td");
-
-
-                    for (let dataCellIndex = 0; dataCellIndex < dataCells.length - 1; dataCellIndex++) {
-
-                        currentRowValues.push(
-                            (dataCells[dataCellIndex].innerText || dataCells[dataCellIndex].textContent).trim()
-                        );
-                    }
-
-                    if (currentRowValues.length > 0) {
-                        worksheetRows.push(currentRowValues);
-                    }
-                }
-
-                const workbook = XLSX.utils.book_new();
-
-                const worksheet = XLSX.utils.aoa_to_sheet(worksheetRows);
-
-                const columnWidths = [];
-
-                for (let columnIndex = 0; columnIndex < headerRow.length; columnIndex++) {
-
-                    let maxColumnWidth = headerRow[columnIndex].length;
-
-                    for (let worksheetRowIndex = 0; worksheetRowIndex < worksheetRows.length; worksheetRowIndex++) {
-
-                        if (worksheetRows[worksheetRowIndex][columnIndex]) {
-                            maxColumnWidth = Math.max(
-                                maxColumnWidth,
-                                String(worksheetRows[worksheetRowIndex][columnIndex]).length
-                            );
+                axios
+                    .get(url, {
+                        headers: {
+                            "Accept": "application/json"
                         }
-                    }
+                    })
+                    .then(function (response) {
+                        var json = response.data;
 
-                    columnWidths.push({
-                        wch: Math.min(maxColumnWidth + 5, 60)
+                        if (!json || typeof json !== "object") {
+                            failExport("Export failed : Invalid response format.");
+                            return;
+                        }
+
+                        if (totalRows === null) {
+                            totalRows = Number(json.totalRows) || 0;
+                        }
+
+                        if (json.myRows && json.myRows.length > 0) {
+                            allRows = allRows.concat(json.myRows);
+                        }
+
+                        exportBtn.innerText =
+                            "Exporting " +
+                            allRows.length +
+                            " / " +
+                            totalRows;
+
+                        if (allRows.length >= totalRows) {
+                            createExcel(allRows);
+                            resetExportButton();
+                            return;
+                        }
+
+                        page = page + 1;
+                        var pageSize = Number(json.actualRows) || 300;
+                        startAt = startAt + pageSize;
+
+                        requestNextPage();
+                    })
+                    .catch(function () {
+                        failExport("Export failed : Unable to fetch data.");
                     });
-                }
+            }
 
-                worksheet["!cols"] = columnWidths;
+            requestNextPage();
+        }
 
-                XLSX.utils.book_append_sheet(
-                    workbook,
-                    worksheet,
-                    "Failed Documents"
+
+        function createExcel(rows) {
+
+            var sheetRows = [];
+
+            sheetRows.push([
+                "OT-FileName",
+                "OT-National ID",
+                "OT-Site",
+                "OT-Customer Name",
+                "OT-Effective Date",
+                "OT-Expiration Date",
+                "OT-Modified Date",
+                "OT-Data ID",
+                "Unprocessed Reason"
+            ]);
+
+            for (
+                var i = 0;
+                i < rows.length;
+                i++
+            ) {
+
+                sheetRows.push([
+                    rows[i].OTFileName,
+                    rows[i].OTNationalId,
+                    rows[i].OTSite,
+                    rows[i].OTCustomerName,
+                    rows[i].OTEffectiveDate,
+                    rows[i].OTExpirationDate,
+                    rows[i].OTModifiedDate,
+                    rows[i].OTDataId,
+                    rows[i].UnprocessedReason
+                ]);
+            }
+
+            var wb =
+                XLSX.utils.book_new();
+
+            var ws =
+                XLSX.utils.aoa_to_sheet(
+                    sheetRows
                 );
 
-                const currentDate = new Date();
+            XLSX.utils.book_append_sheet(
+                wb,
+                ws,
+                "Unprocessed Documents"
+            );
 
-                const year = currentDate.getFullYear();
-                const month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
-                const day = ("0" + currentDate.getDate()).slice(-2);
-
-                const exportFileName =
-                    "Failed_Documents_" +
-                    year + "-" + month + "-" + day +
-                    ".xlsx";
-
-                XLSX.writeFile(workbook, exportFileName);
-
-            }
-            catch (e) {
-                alert(
-                    "Excel export failed : " +
-                    e.message
-                );
-            }
+            XLSX.writeFile(
+                wb,
+                "Unprocessed_Documents.xlsx"
+            );
         }
     </script>
 
