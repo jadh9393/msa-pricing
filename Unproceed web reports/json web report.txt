@@ -1,11 +1,25 @@
 {
-  "actualRows": [LL_REPTAG_TOTALROWS /],
-  "filteredRows": [LL_REPTAG_TOTALSOURCEROWS /],
+  "actualRows": [LL_REPTAG_TOTALROWS /
+  ],
+  "filteredRows": [LL_REPTAG_TOTALSOURCEROWS /
+  ],
   "myRows": [
-[LL_WEBREPORT_STARTROW /][LL_WEBREPORT_IF "[LL_REPTAG_ROWNUM /]" != "1" /],[LL_WEBREPORT_ENDIF /]
-    {"DataId": [LL_REPTAG=DATAID /]}
+    [LL_WEBREPORT_STARTROW /][LL_WEBREPORT_IF "[LL_REPTAG_ROWNUM /]" != "1" /],[LL_WEBREPORT_ENDIF /]
+    {
+      "OTFileName": "[LL_REPTAG_4 /]",
+      "OTNationalId": "[LL_REPTAG_2 CAT:'CLM Search':'National ID':DISPLAY /]",
+      "OTSite": "[LL_REPTAG_2 CAT:'CLM Search':'Lead House - OpCo':DISPLAY /]",
+      "OTCustomerName": "[LL_REPTAG_2 CAT:'CLM Search':'Customer Name':DISPLAY /]",
+      "OTEffectiveDate": "[LL_REPTAG_2 CAT:'CLM Search':'Effective Date':DISPLAY DATE:'%m/%d/%Y' /]",
+      "OTExpirationDate": "[LL_REPTAG_2 CAT:'CLM Search':'Expiration Date':DISPLAY DATE:'%m/%d/%Y' /]",
+      "OTModifiedDate": "[LL_REPTAG=modifyDate DATE:'%m/%d/%Y' /]",
+      "OTDataId": "[LL_REPTAG_2 /]",
+      "UnprocessedReason": "[LL_REPTAG_2 CAT:'CLMTracking':'MSA Pricing Status Note':DISPLAY /]"
+    }
 [LL_WEBREPORT_ENDROW /]
   ],
-  "sourceID": [LL_REPTAG_SOURCEID /],
-  "totalRows": [LL_REPTAG_INDEXTOTALHITS /]
+  "sourceID": [LL_REPTAG_SOURCEID /
+  ],
+  "totalRows": [LL_REPTAG_INDEXTOTALHITS /
+  ]
 }
