@@ -13,3 +13,6 @@ https://les-stg.sysco.com/otcs/cs.exe?func=ll&objId=35944543&objAction=RunReport
 
 web report with pagination:
 https://les-stg.sysco.com/otcs/cs.exe?func=ll&objId=35939069&objAction=RunReport&nexturl=%2Fotcs%2Fcs%2Eexe%3Ffunc%3Dll%26objId%3D35939068%26objAction%3Dbrowse%26viewType%3D1&page=1&startAt=1
+
+
+https://les-stg.sysco.com/otcs/cs.exe?func=ll&objId=35942940&objAction=RunReport&page=1&startAt=1&InputLabel1=20260409&InputLabel2=20260610
