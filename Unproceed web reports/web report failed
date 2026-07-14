@@ -194,8 +194,6 @@
 
                     <b>[LL_REPTAG_&InputLabel2 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel2 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel2
                         SUBSTR:1:4 /]</b>
-                    </br>
-                    Total Records Found: <b>[LL_REPTAG_INDEXTOTALHITS /]</b>
                 </div>
             </div>
 
@@ -289,6 +287,7 @@
     <script>
 
         function exportToExcel() {
+
             var exportBtn =
                 document.getElementById("exportBtn");
 
@@ -312,30 +311,53 @@
                 "[LL_REPTAG_&InputLabel2 /]";
 
             var allRows = [];
+
             var startAt = 1;
             var page = 1;
-            var totalRows = null;
 
-            function resetExportButton() {
-                exportBtn.innerText =
-                    "Export Excel";
+            /*
+                Highest TOTALSOURCEROWS seen.
+                Search counts can shrink on later pages.
+            */
+            var expectedRows = 0;
+
+            /*
+                Used to detect the last page.
+            */
+            var previousActualRows = null;
+
+            function resetButton() {
                 exportBtn.disabled = false;
+                exportBtn.innerText = "Export Excel";
             }
 
-            function failExport(message) {
-                resetExportButton();
+            function fail(message) {
+                resetButton();
                 alert(message);
             }
 
-            function requestNextPage() {
+            function finishExport() {
+
+                exportBtn.innerText =
+                    "Generating Excel...";
+
+                createExcel(allRows);
+
+                resetButton();
+            }
+
+            function fetchPage() {
+
                 var url =
                     "cs.exe?func=ll" +
                     "&objId=35942940" +
                     "&objAction=RunReport" +
                     "&page=" + page +
                     "&startAt=" + startAt +
-                    "&InputLabel1=" + encodeURIComponent(startDate) +
-                    "&InputLabel2=" + encodeURIComponent(endDate);
+                    "&InputLabel1=" +
+                    encodeURIComponent(startDate) +
+                    "&InputLabel2=" +
+                    encodeURIComponent(endDate);
 
                 axios
                     .get(url, {
@@ -344,47 +366,161 @@
                         }
                     })
                     .then(function (response) {
-                        var json = response.data;
 
-                        if (!json || typeof json !== "object") {
-                            failExport("Export failed : Invalid response format.");
+                        var json =
+                            response.data;
+
+                        if (
+                            !json ||
+                            typeof json !== "object"
+                        ) {
+                            fail(
+                                "Invalid response."
+                            );
                             return;
                         }
 
-                        if (totalRows === null) {
-                            totalRows = Number(json.totalRows) || 0;
+                        var pageRows =
+                            Array.isArray(
+                                json.myRows
+                            )
+                                ? json.myRows
+                                : [];
+
+                        var actualRows =
+                            Number(
+                                json.actualRows
+                            ) || 0;
+
+                        var filteredRows =
+                            Number(
+                                json.filteredRows
+                            ) || 0;
+
+                        /*
+                            Keep highest count seen.
+                        */
+                        expectedRows =
+                            Math.max(
+                                expectedRows,
+                                filteredRows
+                            );
+
+                        if (
+                            pageRows.length > 0
+                        ) {
+                            allRows =
+                                allRows.concat(
+                                    pageRows
+                                );
                         }
 
-                        if (json.myRows && json.myRows.length > 0) {
-                            allRows = allRows.concat(json.myRows);
+                        /*
+                            Show percentage instead
+                            of row count.
+                        */
+                        if (
+                            expectedRows > 0
+                        ) {
+
+                            var percentage =
+                                Math.min(
+                                    100,
+                                    Math.round(
+                                        (
+                                            allRows.length *
+                                            100
+                                        ) /
+                                        expectedRows
+                                    )
+                                );
+
+                            exportBtn.innerText =
+                                "Exporting... " +
+                                percentage +
+                                "%";
+                        }
+                        else {
+
+                            exportBtn.innerText =
+                                "Exporting...";
                         }
 
-                        exportBtn.innerText =
-                            "Exporting " +
-                            allRows.length +
-                            " / " +
-                            totalRows;
+                        /*
+                         =====================================
+                         STOP CONDITIONS
+                         =====================================
+                        */
 
-                        if (allRows.length >= totalRows) {
-                            createExcel(allRows);
-                            resetExportButton();
+                        /*
+                            Empty page.
+                        */
+                        if (
+                            pageRows.length === 0
+                        ) {
+                            finishExport();
                             return;
                         }
 
-                        page = page + 1;
-                        var pageSize = Number(json.actualRows) || 300;
-                        startAt = startAt + pageSize;
+                        /*
+                            We received less rows than
+                            previous page.
+                            Usually means last page.
+                        */
+                        if (
+                            previousActualRows !== null &&
+                            actualRows <
+                            previousActualRows
+                        ) {
+                            finishExport();
+                            return;
+                        }
 
-                        requestNextPage();
+                        /*
+                            Safety check.
+                        */
+                        if (
+                            expectedRows > 0 &&
+                            allRows.length >=
+                            expectedRows
+                        ) {
+                            finishExport();
+                            return;
+                        }
+
+                        /*
+                            Another safety check.
+                            Sometimes actualRows can
+                            become zero unexpectedly.
+                        */
+                        if (
+                            actualRows <= 0
+                        ) {
+                            finishExport();
+                            return;
+                        }
+
+                        previousActualRows =
+                            actualRows;
+
+                        startAt =
+                            startAt +
+                            actualRows;
+
+                        page++;
+
+                        fetchPage();
+
                     })
-                    .catch(function () {
-                        failExport("Export failed : Unable to fetch data.");
+                    .catch(function (error) {
+                        fail(
+                            "Export failed while retrieving pages."
+                        );
                     });
             }
 
-            requestNextPage();
+            fetchPage();
         }
-
 
         function createExcel(rows) {
 
