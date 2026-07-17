@@ -194,18 +194,16 @@ Rules:
 Priority order:
 1. Currency values ($)
 2. Percentages (%)
-3. Unit fees (/case, /unit, /lb)
+3. Unit fees (/case, /unit, /lb, /case fee)
 
 Examples:
 - 10.00%
 - $2.50/case
 - $3.65/case
+- $2.50/case fee
+- Per contract with Customer
 
-If text says:
-- "Per contract with Customer"
-- or no numeric/symbol exists
-
-Return NULL.
+- If absent, return NULL.
 
 Source:
 Schedule 1 - Margin Schedule
