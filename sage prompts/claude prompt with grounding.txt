@@ -291,6 +291,45 @@ Covered in Section 3 above.
 
 ## 6. FEE VALUE NORMALIZATION
 
+## 6A. PRIMARY VALUE SELECTION RULE
+
+Some clauses contain multiple numeric values. Before applying the
+MULTI-VALUE RULE, determine whether the field represents:
+
+1. A single fee concept with supporting limits, caps, or alternatives.
+2. Multiple independent fees under the same heading.
+
+### Single fee concepts
+If one value is the actual fee and the remaining numbers are merely:
+- legal caps ("highest rate permitted by law"),
+- explanatory examples,
+- thresholds,
+- percentage-point conversions,
+- duplicated representations of the same fee,
+
+then extract only the primary fee amount.
+
+Examples:
+- "the lesser of 1.5% per month and the highest non-usurious rate permitted by law"
+  → `"1.5%"`
+
+- "ten (10) percentage points"
+  → `"10%"`
+
+- "$2.50 per case, but not to exceed $500"
+  → `"$2.50"`
+
+### Multiple independent charges
+Only return multiple values when the clause explicitly defines separate
+charges that may all apply independently.
+
+Examples:
+- "1.5% monthly interest and $25 for returned checks"
+  → `"1.5%; $25"`
+
+- "(i) 10 percentage points or (ii) 10% of applicable fee per unit"
+  → `"10%"`
+
 For every fee field above:
 - Keep only: currency symbol (`$`), numeric amount, percentage symbol (`%`).
 - Strip descriptive text: "per case," "per invoice," "per month," "monthly
@@ -304,19 +343,53 @@ For every fee field above:
 `"1.5% per monthly interest"` → `"1.5%"`
 `"$2.50/case fee"` → `"$2.50"`
 
-**MULTI-VALUE RULE** (new — use whenever a single bulleted fee clause
-contains more than one explicit numeric+symbol value, whether as
-alternatives ("the lesser of X or Y," "(i) ... or (ii) ...") or as an
-enumerated list of sub-charges under one heading):
-- Extract **every** explicit numeric+symbol value in that clause, in the
-  order it appears.
-- Join them with `; ` for enumerated lists, or with the original connecting
-  word ("or," "the lesser of") for true alternatives.
-- Never pick one value and silently discard the others — that guess is a
-  common source of wrong-field or wrong-value output.
-- Never merge a number from a *different* bullet/heading into this list —
-  the clause boundary (same bullet only) still applies.
+**MULTI-VALUE RULE**
 
+When a fee clause contains multiple numeric expressions:
+
+STEP 1 — Extract all candidate fee values.
+
+STEP 2 — Normalize each value:
+- "ten (10) percentage points" → "10%"
+- "ten percent (10%)" → "10%"
+- "$2.50 per case" → "$2.50"
+- "1.50 percent" → "1.5%"
+
+STEP 3 — Remove semantic duplicates.
+
+Two values are duplicates if they represent the same effective fee after normalization.
+
+Examples:
+- "10 percentage points" = "10%"
+- "$2.50 per case" = "$2.50/case fee"
+- "1.50%" = "1.5%"
+
+STEP 4 — Determine whether remaining values are:
+
+(A) multiple independent charges
+OR
+(B) alternative representations of the same fee.
+
+Only return multiple values when they are independent charges that may all apply.
+
+Return a single value when all normalized values are equivalent.
+
+Examples:
+
+"ten (10) percentage points or ten percent (10%)"
+→ "10%"
+
+"the lesser of 1.5% and the maximum rate permitted by law"
+→ "1.5%"
+
+"1.5% monthly interest and $25 returned check fee"
+→ "1.5%; $25"
+
+"$2.50 per case or $2.50/case fee"
+→ "$2.50"
+
+- "1.5% interest and $25 returned check fee"
+  → "1.5%; $25"
 ---
 
 ## 7. MARGIN SCHEDULE TABLE PARSING
@@ -392,7 +465,7 @@ price, and the new Tier 2 absolute price (see worked example below).
 
 ---
 
-## 9. WORKED EXAMPLES (from your two sample documents)
+## 9. WORKED EXAMPLES
 
 **Example A — Schedule 1 to Master Services Agreement (table-based unit).**
 Grounding shown for every metadata field, and for a representative slice of
@@ -409,7 +482,7 @@ pattern.
     "eci_increase": { "evidence": null, "value": null },
     "cpi_increase": { "evidence": null, "value": null },
     "off_day_delivery_fee": { "evidence": null, "value": null },
-    "split_case_fee": { "evidence": "an additional ten (10) percentage points to the applicable margin percentage or (ii) ten percent (10%) of the applicable fee per unit", "value": "10 or 10%" },
+    "split_case_fee": { "evidence": "an additional ten (10) percentage points to the applicable margin percentage or (ii) ten percent (10%) of the applicable fee per unit", "value": "10%" },
     "restocking_fee": { "evidence": "$2.50 per case for all Product returned to, and accepted by, Sysco", "value": "$2.50" },
     "customer_recalls_fee": { "evidence": "Sysco reserves the right to assess Customer its then current handling charge", "value": null },
     "late_payment_fee": { "evidence": "the lesser of 1.5% per monthly interest and the highest non-usurious rate... and (iv) $25 for any returned check or ACH", "value": "1.5%; $25" },
@@ -433,7 +506,7 @@ pattern.
     "eci_increase": null,
     "cpi_increase": null,
     "off_day_delivery_fee": null,
-    "split_case_fee": "10 or 10%",
+    "split_case_fee": "10%",
     "restocking_fee": "$2.50",
     "customer_recalls_fee": null,
     "late_payment_fee": "1.5%; $25",
