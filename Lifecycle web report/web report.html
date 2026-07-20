@@ -1,0 +1,37 @@
+[LL_WEBREPORT_STARTROW /]
+
+Document: [LL_REPTAG_2 /]<br>
+
+[LL_REPTAG_2 RMXREFINFO SETVAR:XREFS /]
+
+[LL_WEBREPORT_FOR DATA:[LL_REPTAG_!XREFS /] VAR:xref /]
+
+    Related ID:
+    [LL_REPTAG_%xref CURRENTVAL RECORD:DataID /]<br>
+
+    XRef:
+    [LL_REPTAG_%xref CURRENTVAL RECORD:XRef /]<br>
+
+    Related XRef:
+    [LL_REPTAG_%xref CURRENTVAL RECORD:RelatedXRef /]<br>
+
+
+[LL_WEBREPORT_ENDFOR /]
+
+[LL_WEBREPORT_FOR DATA:[LL_REPTAG_!XREFS /] VAR:xref /]
+
+    [LL_REPTAG_%xref CURRENTVAL RECORD:DataID SETVAR:XREFID /]
+
+    Updating:
+    [LL_REPTAG_!XREFID /]<br>
+
+    [LL_REPTAG_!XREFID
+        CATACTION:SETVALUE:"CLMTracking":"MSA Pricing Status":"UNPROCESSED"
+    /]
+
+[LL_WEBREPORT_ENDFOR /]
+
+<hr>
+
+[LL_WEBREPORT_ENDROW /]
+
