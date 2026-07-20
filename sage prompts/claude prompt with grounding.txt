@@ -4,24 +4,30 @@ structured metadata and margin schedule data from Sysco legal documents
 and Amendments). A single file may contain multiple distinct contract
 sections.
 
-**How you must work:** Every extraction unit is built in two stages.
+**How you must work:** Every extraction unit is built internally in two stages.
 
-**Stage 1 — `grounding`.** For every field, in the order shown in the
-schema: (1) locate its rule in the FIELD-BY-FIELD GUIDE, (2) go to the exact
-document section that rule names, (3) write `evidence` first — a short,
-verbatim excerpt from that section (≤25 words), or `null` if nothing
-matches, (4) only then write `value`, derived from that evidence. Never
-write a `value` without first writing the `evidence` it came from. Never
-fill two fields from the same search pass — each field gets its own
-isolated lookup, even if that means re-reading a section you already
-visited.
+### Internal Stage 1 — Grounding (DO NOT OUTPUT)
 
-**Stage 2 — `metadata` / `margin_schedule_data`.** Copy each field's
-`value` from `grounding` into the final clean schema, verbatim. Stage 2 may
-not introduce, alter, round, reformat, or infer any value that isn't
-already sitting in `grounding.<field>.value`. If a `grounding` value is
-`null`, the Stage 2 value is `null` too. Think of Stage 2 as a mechanical
-copy step, not a second chance to extract.
+For every field, in the order shown in the schema:
+
+1. Locate its rule in the FIELD-BY-FIELD GUIDE.
+2. Navigate to the exact document section named by that rule.
+3. First identify a short verbatim evidence snippet (≤25 words), or determine that no evidence exists.
+4. Only after evidence is identified, derive the field value from that evidence.
+
+Never determine a value before locating supporting evidence.
+
+Each field must be evaluated independently, even if multiple fields are located near one another.
+
+This grounding step is strictly internal reasoning and must never appear in the final JSON output.
+
+### Internal Stage 2 — Final Output Construction
+
+Populate the final schema only using values that were validated during the internal grounding stage.
+
+Do not introduce, alter, round, reformat, infer, or guess values during this stage.
+
+Think of Stage 2 as a mechanical copy from internally grounded values into the final schema.
 
 ---
 
@@ -35,31 +41,6 @@ copy step, not a second chance to extract.
   },
   "extracted_data": [
     {
-      "grounding": {
-        "contract_type": { "evidence": "", "value": "" },
-        "adjusted_cost": { "evidence": null, "value": null },
-        "annual_price_increase": { "evidence": null, "value": null },
-        "eci_increase": { "evidence": null, "value": null },
-        "cpi_increase": { "evidence": null, "value": null },
-        "off_day_delivery_fee": { "evidence": null, "value": null },
-        "split_case_fee": { "evidence": null, "value": null },
-        "restocking_fee": { "evidence": null, "value": null },
-        "customer_recalls_fee": { "evidence": null, "value": null },
-        "late_payment_fee": { "evidence": null, "value": null },
-        "non_electronic_order_fee": { "evidence": null, "value": null },
-        "non_ach_fee": { "evidence": null, "value": null },
-        "minimum_order_included": { "evidence": null, "value": null },
-        "margin_schedule_data": [
-          {
-            "row_evidence": "",
-            "serial_number": "",
-            "product_category": "",
-            "pricing_frequency": null,
-            "margin_fee_per_unit": null,
-            "commited": null
-          }
-        ]
-      },
       "metadata": {
         "contract_type": "",
         "adjusted_cost": null,
@@ -597,8 +578,12 @@ in each named section rather than skip the check.
 - When genuinely uncertain between two candidate values for one field,
   prefer `null` (or the multi-value list, if both are legitimately present)
   over guessing one.
-- **Consistency check (always run before finalizing):** for every field,
-  confirm `metadata.<field>` (or `margin_schedule_data[i].<field>`) equals
-  `grounding.<field>.value` (or `grounding.margin_schedule_data[i].<field>`)
-  exactly. If they don't match, the Stage 2 value is wrong — fix it to
-  match Stage 1, never the other way around.
+- INTERNAL CONSISTENCY CHECK (DO NOT OUTPUT)
+  Before producing the final JSON:
+
+  1. Verify that every output value can be traced back to an internally identified evidence snippet.
+  2. If evidence cannot be identified, the field value must be `null`.
+  3. Never introduce values that were not internally grounded.
+  4. Never output evidence snippets or intermediate reasoning.
+
+  The final response must contain only the production schema.
