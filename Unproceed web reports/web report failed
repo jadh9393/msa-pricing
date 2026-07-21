@@ -142,6 +142,48 @@
             outline-offset: 2px;
         }
 
+        .pagination-container {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            background: white;
+            color: #1a365d;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 40px;
+            font-weight: 600;
+        }
+
+        .pagination-btn:hover {
+            background: #edf2f7;
+        }
+
+        .pagination-btn.active {
+            background: #1a365d;
+            color: white;
+            border-color: #1a365d;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-summary {
+            margin-top: 15px;
+            text-align: center;
+            color: #555;
+            font-size: 14px;
+        }
+
         @media (max-width: 768px) {
             .report-header-bar {
                 flex-direction: column;
@@ -187,12 +229,14 @@
                 <div class="filter-info">
                     Search Date Range:
 
-                    <b>[LL_REPTAG_&InputLabel1 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel1 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel1
+                    <b>[LL_REPTAG_&InputLabel1 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel1 SUBSTR:7:2
+                        /]/[LL_REPTAG_&InputLabel1
                         SUBSTR:1:4 /]</b>
 
                     →
 
-                    <b>[LL_REPTAG_&InputLabel2 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel2 SUBSTR:7:2 /]/[LL_REPTAG_&InputLabel2
+                    <b>[LL_REPTAG_&InputLabel2 SUBSTR:5:2 /]/[LL_REPTAG_&InputLabel2 SUBSTR:7:2
+                        /]/[LL_REPTAG_&InputLabel2
                         SUBSTR:1:4 /]</b>
                 </div>
             </div>
@@ -283,9 +327,219 @@
         </tbody>
 
     </table>
+    <div class="pagination-summary" id="paginationSummary"></div>
 
+    <div id="paginationContainer" class="pagination-container">
+    </div>
     <script>
+        (function () {
 
+            var totalRows =
+                parseInt(
+                    "[LL_REPTAG_INDEXTOTALHITS /]"
+                ) || 0;
+
+            if (totalRows <= 300)
+                return;
+
+            var pageSize = 300;
+
+            var params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            var currentPage =
+                parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+
+            var totalPages =
+                Math.ceil(
+                    totalRows / pageSize
+                );
+
+            var container =
+                document.getElementById(
+                    "paginationContainer"
+                );
+
+            var summary =
+                document.getElementById(
+                    "paginationSummary"
+                );
+
+            var start =
+                ((currentPage - 1) * pageSize) + 1;
+
+            var end =
+                Math.min(
+                    currentPage * pageSize,
+                    totalRows
+                );
+
+            summary.innerHTML =
+                "Showing " +
+                start +
+                " - " +
+                end +
+                " of " +
+                ~ totalRows +
+                " documents";
+
+            function gotoPage(page) {
+
+                var startFormatted =
+                    "[LL_REPTAG_&InputLabel1 /]";
+
+                var endFormatted =
+                    "[LL_REPTAG_&InputLabel2 /]";
+
+                var startAt =
+                    ((page - 1) * 300) + 1;
+
+                window.location.href =
+                    "cs.exe"
+                    + "?func=ll"
+                    + "&objId=35944543"
+                    + "&objAction=RunReport"
+                    + "&page=" + page
+                    + "&startAt=" + startAt
+                    + "&InputLabel1="
+                    + encodeURIComponent(
+                        startFormatted
+                    )
+                    + "&InputLabel2="
+                    + encodeURIComponent(
+                        endFormatted
+                    );
+            }
+
+            function addButton(
+                label,
+                page,
+                active,
+                disabled
+            ) {
+
+                var btn =
+                    document.createElement(
+                        "button"
+                    );
+
+                btn.className =
+                    "pagination-btn";
+
+                btn.innerText =
+                    label;
+
+                if (active)
+                    btn.classList.add(
+                        "active"
+                    );
+
+                if (disabled)
+                    btn.disabled = true;
+
+                btn.onclick =
+                    function () {
+                        gotoPage(page);
+                    };
+
+                container.appendChild(
+                    btn
+                );
+            }
+
+            addButton(
+                "«",
+                currentPage - 1,
+                false,
+                currentPage === 1
+            );
+
+            var startPage =
+                Math.max(
+                    1,
+                    currentPage - 2
+                );
+
+            var endPage =
+                Math.min(
+                    totalPages,
+                    currentPage + 2
+                );
+
+            if (startPage > 1) {
+
+                addButton(
+                    "1",
+                    1
+                );
+
+                if (startPage > 2) {
+
+                    var dots =
+                        document.createElement(
+                            "span"
+                        );
+
+                    dots.innerHTML = "...";
+
+                    container.appendChild(
+                        dots
+                    );
+                }
+            }
+
+            for (
+                var i = startPage;
+                i <= endPage;
+                i++
+            ) {
+
+                addButton(
+                    i,
+                    i,
+                    i === currentPage
+                );
+            }
+
+            if (
+                endPage <
+                totalPages
+            ) {
+
+                if (
+                    endPage <
+                    totalPages - 1
+                ) {
+
+                    var dots2 =
+                        document.createElement(
+                            "span"
+                        );
+
+                    dots2.innerHTML =
+                        "...";
+
+                    container.appendChild(
+                        dots2
+                    );
+                }
+
+                addButton(
+                    totalPages,
+                    totalPages
+                );
+            }
+
+            addButton(
+                "»",
+                currentPage + 1,
+                false,
+                currentPage === totalPages
+            );
+
+        })();
         function exportToExcel() {
 
             var exportBtn =
