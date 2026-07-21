@@ -1,0 +1,7 @@
+Running the cleanup web report for excel files created more than 365 days ago
+
+[LL_REPTAG_DATE DATEDEC:365:DAYS DATE:"%Y%m%d" SETVAR:ENDDATE /]
+
+365 Days Ago: [LL_REPTAG_!ENDDATE /]
+
+[LL_WEBREPORT_SUBWEBREPORT NODEID:35955346 PARM:InputLabel1:20260701 PARM:InputLabel2:[LL_REPTAG_!ENDDATE /] /]
