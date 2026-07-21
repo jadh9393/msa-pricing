@@ -1,35 +1,22 @@
 [LL_WEBREPORT_STARTROW /]
-
-Document: [LL_REPTAG_2 /]<br>
-
 [LL_REPTAG_2 RMXREFINFO SETVAR:XREFS /]
 
+Document: [LL_REPTAG_2 /]
+
 [LL_WEBREPORT_FOR DATA:[LL_REPTAG_!XREFS /] VAR:xref /]
+[LL_REPTAG_%xref CURRENTVAL RECORD:DataID SETVAR:XREFID /]
+Associate: [LL_REPTAG_!XREFID /] ([LL_REPTAG_%xref CURRENTVAL RECORD:XRef /])
 
-    Associate Document ID:
-    [LL_REPTAG_%xref CURRENTVAL RECORD:DataID /]<br>
+[LL_REPTAG_!XREFID CATACTION:SETVALUE:"CLMTracking":"MSA Pricing Status":"UNPROCESSED" /]
+[LL_REPTAG_DATETIME SETVAR:NOW /]
+[LL_REPTAG_!XREFID CATACTION:SETVALUE:"CLMTracking":"MSA Pricing Status Note":"[LL_REPTAG_!NOW /]" /]
 
-    XRef Relation:
-    [LL_REPTAG_%xref CURRENTVAL RECORD:XRef /]<br>
-
-
-    [LL_REPTAG_%xref CURRENTVAL RECORD:DataID SETVAR:XREFID /]
-
-    Updating Associate Document:
-    [LL_REPTAG_!XREFID /]<br>
-
-    [LL_REPTAG_!XREFID CATACTION:SETVALUE:"CLMTracking":"MSA Pricing Status":"UNPROCESSED" /]
-    
-
-
-    [LL_REPTAG_DATETIME SETVAR:NOW /]
-    Current Time: [LL_REPTAG_!NOW /]<br>
-    [LL_REPTAG_!XREFID CATACTION:SETVALUE:"CLMTracking":"MSA Pricing Status Note":"[LL_REPTAG_!NOW /]" /]
-
+Updated at: [LL_REPTAG_!NOW /]
 [LL_WEBREPORT_ENDFOR /]
 
+Deleting Document: [LL_REPTAG_2 /]
+[LL_REPTAG_2 NODEACTION:DELETE /]
 
-<hr>
+--------------------------------------------
 
 [LL_WEBREPORT_ENDROW /]
-
