@@ -1,7 +1,15 @@
-Running the cleanup web report for excel files created more than 365 days ago
+Running the cleanup web report for excel files created more than 365 days ago<br>
 
+[LL_REPTAG_&objId NODEINFO:CREATEDATE DATE:"%Y%m%d" SETVAR:DEPLOYMENT_DATE /]
 [LL_REPTAG_DATE DATEDEC:365:DAYS DATE:"%Y%m%d" SETVAR:ENDDATE /]
 
-365 Days Ago: [LL_REPTAG_!ENDDATE /]
+Deployment Date / Start Date:
+[LL_REPTAG_!DEPLOYMENT_DATE /]<br>
 
-[LL_WEBREPORT_SUBWEBREPORT NODEID:35955346 PARM:InputLabel1:20260701 PARM:InputLabel2:[LL_REPTAG_!ENDDATE /] /]
+365 Days Ago:
+[LL_REPTAG_!ENDDATE /]<br>
+
+Sub Report ID ( Set as a const in webreport ):
+[LL_REPTAG_$SUB_WEBREPORT_ID /]<br>
+
+[LL_WEBREPORT_SUBWEBREPORT NODEID:[LL_REPTAG_$SUB_WEBREPORT_ID /] PARM:InputLabel1:[LL_REPTAG_!DEPLOYMENT_DATE /] PARM:InputLabel2:[LL_REPTAG_!ENDDATE /] /]
