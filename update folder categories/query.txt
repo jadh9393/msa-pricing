@@ -1,0 +1,9 @@
+Query:
+
+Attr_25693174_27:"MSAs, Amendments, Termination Agreements"
+OTSubType:0
+OTName:"MSAs, Amendments, Termination Agreements"
+
+
+Location:
+Enterprise:Contract Life Cycle Management:LCC

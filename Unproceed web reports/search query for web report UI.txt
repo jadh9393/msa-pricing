@@ -1,0 +1,17 @@
+Query:
+
+(
+    Attr_35927465_2:"PROCESSING_FAILED"
+    OR
+    Attr_35927465_2:"INGESTION_FAILED"
+)
+AND OTCreateDate:qlrange '%1~%2'
+AND OTSubType:144
+
+
+Location:
+Enterprise:Contract Life Cycle Management:LCC
+
+
+
+Attached to: web report failed
