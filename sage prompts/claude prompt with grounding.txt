@@ -533,6 +533,61 @@ Yes → split row (B). No, cell is empty/merged → child row (A).
 ### Other table rules
 - **Split-row numbering:** append lowercase letters in visual order (7a,
   7b), not new serial numbers.
+
+-  ***Implicit serial numbering
+
+Some Margin Schedule tables do not contain an explicit serial-number column.
+
+In such cases:
+
+1. Generate serial numbers by counting top-level rows from top to bottom,
+   beginning with `"1"`.
+
+2. Any visually grouped or lettered sub-rows
+   (`a)`, `b)`, `c)`, etc.)
+   inherit the most recent top-level row number.
+
+Examples:
+
+Healthcare
+→ `"1"`
+
+Dairy
+→ `"2"`
+
+Meats
+→ `"3"`
+
+a) Seafood
+→ `"3a"`
+
+b) Frozen Lobster Meat
+→ `"3b"`
+
+c) Fresh Crab Meat
+→ `"3c"`
+
+Poultry
+→ `"4"`
+
+a) Frozen
+→ `"4a"`
+
+b) Mozzarella Cheese Sticks
+→ `"4b"`
+
+Never output:
+- `"a"`
+- `"b"`
+- `"c"`
+- `null`
+
+for lettered rows when the parent row can be identified.
+
+Only output `serial_number = null`
+for true child SKU/detail rows that are not lettered and are not independent
+pricing categories.
+
 - **Checkbox handling:** `commited` should only be populated when a Yes/No selection is visibly
   present on that exact row.
 
