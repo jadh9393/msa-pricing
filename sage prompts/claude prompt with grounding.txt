@@ -100,14 +100,36 @@ fix Stage 1, don't patch Stage 2 directly.
 - `margin_schedule_data` is always an array; one object per row, including
   every split sub-row (7a, 7b, ...) as its own object.
 
+## SUPPORTED CONTRACT TYPES
+
+Margin Schedule extraction is supported only for the following contract types:
+
+1. Master Service Agreement
+2. Amendment
+3. Distribution Agreement
+4. Participation Agreement
+
+Any extraction unit whose boundary title does not match one of the
+supported contract types above must be rejected.
+
+Supported amendment titles include:
+- Amendment Agreement
+- Any ordinal amendment title
+  (e.g., First Amendment, Second Amendment, Third Amendment, etc.)
+
+Rejection reason:
+"Unsupported contract type for Margin Schedule extraction."
+
 ---
 
 ## 2. DOCUMENT VALIDATION (do this before anything else)
 
 Reject the document (`accepted = false`, `extracted_data = []`, and a
-one-line `rejection_reason`) if **any** of the following are true:
+one-line `rejection_reason`) if any of the following are true:
+
 - Text is heavily blurred/corrupted or OCR output is fragmented.
 - Contract titles cannot be confidently identified.
+- The detected contract type is not one of the supported contract types.
 - The Schedule 1 – Margin Schedule table is illegible or its row/column
   alignment is ambiguous.
 - Product categories or numeric fee values cannot be confidently read.
@@ -123,10 +145,18 @@ If accepted, proceed to boundary detection.
 
 ## 3. CONTRACT BOUNDARY DETECTION
 
-A new extraction unit begins at each valid contract/amendment title:
-`MASTER SERVICE(S) AGREEMENT`, `DISTRIBUTION AGREEMENT`,
-`PARTICIPATION AGREEMENT`, `AMENDMENT AGREEMENT`, `FIRST/SECOND/THIRD
-AMENDMENT`, etc.
+A new extraction unit begins only at the following supported boundary titles:
+
+`MASTER SERVICE AGREEMENT`
+`MASTER SERVICES AGREEMENT`
+`DISTRIBUTION AGREEMENT`
+`PARTICIPATION AGREEMENT`
+`AMENDMENT AGREEMENT`
+Any ordinal amendment title
+(e.g. `FIRST AMENDMENT`, `SECOND AMENDMENT`,
+`THIRD AMENDMENT`, etc.)
+
+Any other boundary title is unsupported and must be rejected.
 
 - Everything after a boundary title belongs to that unit until the next
   boundary title appears.
@@ -136,15 +166,37 @@ AMENDMENT`, etc.
   modifies fees and has no margin table.
 - Preserve document order in the output array.
 
-**`contract_type` rule (fills the first metadata field):**
-Take the boundary title exactly as it heads that unit, strip wrapper text
-like "Schedule 1 to" or "to Master Distribution Agreement," and keep the
-core agreement type as written, including plurals ("Master Services
-Agreement" stays as written, don't silently change to "Master Service
-Agreement"). If the title is an ordinal amendment ("First Amendment"),
-preserve the ordinal. If it's an untitled generic "Amendment Agreement,"
-use that exact phrase. Never leave this field null — if a unit exists, it
-had a boundary title that produced it.
+**contract_type rule (fills the first metadata field):**
+
+Normalize every detected boundary title into one of the following values only:
+
+- `Master Service Agreement`
+- `Amendment`
+- `Distribution Agreement`
+- `Participation Agreement`
+
+Normalization rules:
+
+- `MASTER SERVICE AGREEMENT`
+- `MASTER SERVICES AGREEMENT`
+- `SCHEDULE 1 TO MASTER SERVICES AGREEMENT`
+→ `Master Service Agreement`
+
+- `AMENDMENT AGREEMENT`
+- `FIRST AMENDMENT`
+- `SECOND AMENDMENT`
+- Any ordinal amendment title
+- `FIRST AMENDMENT TO MASTER SERVICES AGREEMENT`
+- `SECOND AMENDMENT TO DISTRIBUTION AGREEMENT`
+→ `Amendment`
+
+- `DISTRIBUTION AGREEMENT`
+→ `Distribution Agreement`
+
+- `PARTICIPATION AGREEMENT`
+→ `Participation Agreement`
+
+`contract_type` must always contain exactly one of these four values.
 
 ---
 
@@ -160,6 +212,27 @@ If an Amendment references a prior Agreement:
 If the Amendment modifies pricing via prose clauses instead of a Schedule 1
 table, use the AMENDMENT CLAUSE EXTRACTION RULES (Section 7) to build
 synthetic margin schedule rows instead.
+
+---
+
+## 4.5 DOCUMENT SECTIONS TO SEARCH
+
+For EACH extraction unit, search only within its associated sections:
+
+1. Schedule 1 - Margin Schedule
+2. Footnotes directly below the Margin Schedule
+3. Other Fees section
+4. Minimum Order Surcharge paragraph
+5. Minimum Order Surcharge table
+6. Amendment pricing modification clauses
+
+Rules:
+
+- Never search outside the currently active extraction unit.
+- Never use clauses belonging to another contract boundary.
+- Never copy values from previous or subsequent agreements.
+- Every field must be sourced only from the section specified in its field rule.
+- If evidence is not found inside the permitted section, return null.
 
 ---
 
@@ -379,16 +452,67 @@ Parse Schedule 1 row-by-row, exactly as laid out.
 
 ### Two sub-row patterns — check which one applies before extracting
 
-**A. Child SKU rows (inherit from parent):** the sub-line is an unlettered
-product description/SKU with **no value of its own** in the Pricing
-Frequency or Margin/Fee columns (those cells are blank or visually merged
-with the parent row). In this case the child row inherits the parent's
-`pricing_frequency` and `commited`, keeps `serial_number = null`, and keeps
-its own exact product category text.
+### A. Child SKU / Detail rows (not split rows)
+
+The sub-line is an unlettered product description or SKU beneath a parent
+category.
+
+Rules:
+
+- Every child SKU line must be extracted as its own row object.
+- Child rows never receive their own serial number.
+
+Extraction rules:
+
+- `serial_number = null`
+- `product_category` = exact child SKU text.
+- If the child row contains its own Margin/Fee value, extract it exactly.
+- If Pricing Frequency is visually blank, return `null`.
+- If Committed checkbox is visually blank/not explicitly repeated, return `null`.
+- Never inherit `pricing_frequency`, `commited`, or `margin_fee_per_unit`
+  from the parent row unless those values are visibly present on the child row.
+
+Child SKU rows are different from split rows because they are not lettered
+(a, b, c...) and do not represent independent pricing categories.
 
 ```json
-{ "serial_number": "2", "product_category": "Dairy", "pricing_frequency": "weekly", "margin_fee_per_unit": "12%", "commited": "Y" },
-{ "serial_number": null, "product_category": "7162276 Cheese Moz Shred Whl Milk", "pricing_frequency": "weekly", "margin_fee_per_unit": "Block Tier #3", "commited": "Y" }
+[
+  {
+    "serial_number": "2",
+    "product_category": "Dairy",
+    "pricing_frequency": "weekly",
+    "margin_fee_per_unit": "12.00%",
+    "commited": "Y"
+  },
+  {
+    "serial_number": null,
+    "product_category": "7162276 Cheese Mozz Shred Whl Milk",
+    "pricing_frequency": null,
+    "margin_fee_per_unit": "Block Tier #3",
+    "commited": null
+  },
+  {
+    "serial_number": null,
+    "product_category": "2856108 Cheese Mozzarella Wm Shrd Prem",
+    "pricing_frequency": null,
+    "margin_fee_per_unit": "Block Tier #3",
+    "commited": null
+  },
+  {
+    "serial_number": null,
+    "product_category": "7100616 Cheese Mozzarella Sliced",
+    "pricing_frequency": null,
+    "margin_fee_per_unit": "Block Tier #3",
+    "commited": null
+  },
+  {
+    "serial_number": null,
+    "product_category": "7281615 Cheese Mozz Lmps Sli",
+    "pricing_frequency": null,
+    "margin_fee_per_unit": "Block Tier #3",
+    "commited": null
+  }
+]
 ```
 
 **B. Split rows (own values, do not inherit):** the sub-line is lettered
@@ -409,9 +533,15 @@ Yes → split row (B). No, cell is empty/merged → child row (A).
 ### Other table rules
 - **Split-row numbering:** append lowercase letters in visual order (7a,
   7b), not new serial numbers.
-- **Checkbox inheritance:** if one checkbox covers multiple lettered
-  sub-rows (e.g. a single Yes/No for the whole "9." row block), all
-  sub-rows inherit that same `commited` value.
+- **Checkbox handling:** `commited` should only be populated when a Yes/No selection is visibly
+  present on that exact row.
+
+  If a lettered sub-row or child row does not display its own checkbox
+  selection, then:
+
+  ```json
+  "commited": null
+
 - **Non-numeric margin values** ("Block Tier #3," "Per contract with
   Customer") are valid values — preserve exactly, do not convert to `null`.
 - **Footnote stripping:** remove superscripts/footnote markers from
@@ -420,6 +550,22 @@ Yes → split row (B). No, cell is empty/merged → child row (A).
   alphanumeric numbering (7a, 12b), strip trailing periods.
 
 ---
+### Value inheritance rules
+
+For every row object:
+
+- `pricing_frequency` is populated only if visibly present on that row.
+- `margin_fee_per_unit` is populated only if visibly present on that row.
+- `commited` is populated only if visibly present on that row.
+
+Blank cells remain `null`.
+
+Never inherit values from parent rows, grouped rows, merged cells,
+previous rows, or neighboring rows.
+
+The only exception is when the document explicitly repeats the value
+across the grouped rows in a way that makes the value visibly applicable
+to that exact row.
 
 ## 8. AMENDMENT CLAUSE EXTRACTION (no Schedule 1 table present)
 
