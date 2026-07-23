@@ -122,25 +122,97 @@ Rejection reason:
 
 ---
 
-## 2. DOCUMENT VALIDATION (do this before anything else)
+## 2. DOCUMENT VALIDATION (MANDATORY GATE)
 
-Reject the document (`accepted = false`, `extracted_data = []`, and a
-one-line `rejection_reason`) if any of the following are true:
+This validation MUST be completed before any extraction begins.
 
-- Text is heavily blurred/corrupted or OCR output is fragmented.
-- Contract titles cannot be confidently identified.
-- The detected contract type is not one of the supported contract types.
-- The Schedule 1 – Margin Schedule table is illegible or its row/column
-  alignment is ambiguous.
-- Product categories or numeric fee values cannot be confidently read.
-- More than 30% of required sections are unreadable.
+The model must first determine whether the document is one of the supported
+Sysco contract types.
 
-Do not attempt partial extraction on a document you'd reject. Examples of
-good rejection reasons: "Schedule 1 table is too blurred to determine row
-boundaries," "Contract section headers are unreadable."
+If ANY validation check fails:
 
-If accepted, proceed to boundary detection.
+- STOP immediately.
+- Do NOT continue to contract boundary detection.
+- Do NOT extract metadata.
+- Do NOT extract margin schedule rows.
+- Do NOT use example outputs as a template.
+- Return only the rejection JSON.
 
+Return exactly:
+
+{
+  "document_status": {
+    "accepted": false,
+    "rejection_reason": "<reason>"
+  },
+  "extracted_data": []
+}
+
+Reject for any of the following:
+
+1. CONTRACT TYPE MISMATCH
+   - The document is not a Master Service Agreement,
+     Distribution Agreement,
+     Participation Agreement,
+     or Amendment.
+   - Examples include certificates, invoices, purchase orders etc.
+
+   rejection_reason:
+   "Document does not contain supported contract types"
+
+2. CORRUPT FILE
+   - The document cannot be opened.
+   - PDF is damaged.
+   - File cannot be read.
+
+   rejection_reason:
+   "Corrupt file - Unable to read/open"
+
+3. BLURRED FILE
+   - OCR cannot confidently read the text.
+   - Contract title cannot be determined.
+   - Margin Schedule is illegible.
+
+   rejection_reason:
+   "Blurred or unreadable document"
+
+Only after passing ALL validation checks may extraction begin.
+
+DO NOT HALLUCINATE
+
+IMPORTANT
+
+Never assume a document is a contract.
+
+Never infer the contract type.
+
+Never use the example JSON as a fallback.
+
+If no supported contract title is found,
+the document MUST be rejected.
+
+It is better to reject than to fabricate data.
+
+A supported contract boundary MUST be positively identified before any
+metadata extraction begins.
+
+If no supported boundary title is found anywhere in the document:
+
+STOP.
+
+Return
+
+{
+  "document_status": {
+    "accepted": false,
+    "rejection_reason": "Document does not contain supported contract types"
+  },
+  "extracted_data": []
+}
+
+Do not continue searching for metadata.
+Do not attempt partial extraction.
+Do not guess the contract type.
 ---
 
 ## 3. CONTRACT BOUNDARY DETECTION
