@@ -1,15 +1,13 @@
 Running the cleanup web report for excel files created more than 365 days ago<br>
 
-[LL_REPTAG_&objId NODEINFO:CREATEDATE DATE:"%Y%m%d" SETVAR:DEPLOYMENT_DATE /]
 [LL_REPTAG_DATE DATEDEC:365:DAYS DATE:"%Y%m%d" SETVAR:ENDDATE /]
-
-Deployment Date / Start Date:
-[LL_REPTAG_!DEPLOYMENT_DATE /]<br>
 
 365 Days Ago:
 [LL_REPTAG_!ENDDATE /]<br>
 
+<!-- we are selecting all margin schedule excel files created before the day which is 365 days earlier from today -->
+
 Sub Report ID ( Set as a const in webreport ):
 [LL_REPTAG_$SUB_WEBREPORT_ID /]<br>
 
-[LL_WEBREPORT_SUBWEBREPORT NODEID:[LL_REPTAG_$SUB_WEBREPORT_ID /] PARM:InputLabel1:[LL_REPTAG_!DEPLOYMENT_DATE /] PARM:InputLabel2:[LL_REPTAG_!ENDDATE /] /]
+[LL_WEBREPORT_SUBWEBREPORT NODEID:[LL_REPTAG_$SUB_WEBREPORT_ID /] PARM:InputLabel1:[LL_REPTAG_!ENDDATE /] /]

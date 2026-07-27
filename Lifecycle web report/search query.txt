@@ -1,7 +1,7 @@
 Full Text: Complex Query
 ------------------------------------
 OTSubType:144
-AND OTCreateDate:qlrange '%1~%2'
+AND OTCreateDate:<'%1'
     
 Location:
 ------------------------------------
