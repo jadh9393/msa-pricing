@@ -1,3 +1,8 @@
 set the schedule to wrapper.
 Also set the subreport id as a const in the web report.
 also destination should be html for report to show within the wrapper.
+
+
+note: we dont need pagination, because this runs daily after 365 days.
+only the files older than 365 days are captured.
+we dont get 300 documents daily
