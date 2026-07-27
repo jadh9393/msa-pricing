@@ -721,125 +721,69 @@ price, and the new Tier 2 absolute price (see worked example below).
 
 ## 9. WORKED EXAMPLES
 
-**Example A — Schedule 1 to Master Services Agreement (table-based unit).**
-Grounding shown for every metadata field, and for a representative slice of
-margin rows (including the 7a/7b split pair, to show that mechanic) — the
-remaining rows (2-6, 8, 10, 11) follow the identical row_evidence → value
-pattern.
-
+Example 1 – Rejected document
 ```json
 {
-  "grounding": {
-    "contract_type": { "evidence": "SCHEDULE 1 TO MASTER SERVICES AGREEMENT", "value": "Master Services Agreement" },
-    "adjusted_cost": { "evidence": "Sysco may... adjust Cost... if the Cost of any commodity or market-sensitive Product... changes more than five percent (5%)", "value": "5%" },
-    "annual_price_increase": { "evidence": "Commencing with the first anniversary of the Effective Date... the fees per unit will be increased by three percent (3.0%)", "value": "3.0%" },
-    "eci_increase": { "evidence": null, "value": null },
-    "cpi_increase": { "evidence": null, "value": null },
-    "off_day_delivery_fee": { "evidence": null, "value": null },
-    "split_case_fee": { "evidence": "an additional ten (10) percentage points to the applicable margin percentage or (ii) ten percent (10%) of the applicable fee per unit", "value": "10%" },
-    "restocking_fee": { "evidence": "$2.50 per case for all Product returned to, and accepted by, Sysco", "value": "$2.50" },
-    "customer_recalls_fee": { "evidence": "Sysco reserves the right to assess Customer its then current handling charge", "value": null },
-    "late_payment_fee": { "evidence": "the lesser of 1.5% per monthly interest and the highest non-usurious rate... and (iv) $25 for any returned check or ACH", "value": "1.5%; $25" },
-    "non_electronic_order_fee": { "evidence": null, "value": null },
-    "non_ach_fee": { "evidence": "$15.00 per invoice if payments to Sysco are not paid using ACH debit or credit entries", "value": "$15.00" },
-    "minimum_order_included": { "evidence": null, "value": "No" },
-    "margin_schedule_data": [
-      { "row_evidence": "1. Healthcare weekly 10.00% Yes[x] No[ ]", "serial_number": "1", "product_category": "Healthcare", "pricing_frequency": "weekly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-      { "row_evidence": "7. a) Canned & Dry monthly 10.00% Yes[x] No[ ]", "serial_number": "7a", "product_category": "Canned & Dry", "pricing_frequency": "monthly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-      { "row_evidence": "b) Bottled Water monthly $2.50/case fee (same Yes[x] checkbox as 7a)", "serial_number": "7b", "product_category": "Bottled Water", "pricing_frequency": "monthly", "margin_fee_per_unit": "$2.50/case fee", "commited": "Y" },
-      { "row_evidence": "9. a) Chemical/Janitorial monthly 10.00% Yes[x] No[ ]", "serial_number": "9a", "product_category": "Chemical/Janitorial", "pricing_frequency": "monthly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-      { "row_evidence": "b) Ecolab monthly Per contract with Customer (same Yes[x] checkbox as 9a)", "serial_number": "9b", "product_category": "Ecolab", "pricing_frequency": "monthly", "margin_fee_per_unit": "Per contract with Customer", "commited": "Y" },
-      { "row_evidence": "12. a) Dispenser Beverage monthly 10.00% Yes[x] No[ ]", "serial_number": "12a", "product_category": "Dispenser Beverage", "pricing_frequency": "monthly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-      { "row_evidence": "b) Coke, Pepsi, Dr. Pepper, Starbucks monthly Per contract with Customer (same Yes[x] checkbox as 12a)", "serial_number": "12b", "product_category": "Coke, Pepsi, Dr. Pepper, Starbucks", "pricing_frequency": "monthly", "margin_fee_per_unit": "Per contract with Customer", "commited": "Y" }
-    ]
+  "document_status": {
+    "accepted": false,
+    "rejection_reason": "Document does not contain supported contract types"
   },
-  "metadata": {
-    "contract_type": "Master Services Agreement",
-    "adjusted_cost": "5%",
-    "annual_price_increase": "3.0%",
-    "eci_increase": null,
-    "cpi_increase": null,
-    "off_day_delivery_fee": null,
-    "split_case_fee": "10%",
-    "restocking_fee": "$2.50",
-    "customer_recalls_fee": null,
-    "late_payment_fee": "1.5%; $25",
-    "non_electronic_order_fee": null,
-    "non_ach_fee": "$15.00",
-    "minimum_order_included": "No",
-    "minimum_order_surcharge_table_order_size": [],
-    "minimum_order_surcharge_table_surcharge": []
-  },
-  "margin_schedule_data": [
-    { "serial_number": "1", "product_category": "Healthcare", "pricing_frequency": "weekly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-    { "serial_number": "2", "product_category": "Dairy", "pricing_frequency": "weekly", "margin_fee_per_unit": "8.00%", "commited": "Y" },
-    { "serial_number": "3", "product_category": "Meats", "pricing_frequency": "weekly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-    { "serial_number": "4", "product_category": "Seafood", "pricing_frequency": "weekly", "margin_fee_per_unit": "8.00%", "commited": "Y" },
-    { "serial_number": "5", "product_category": "Poultry", "pricing_frequency": "weekly", "margin_fee_per_unit": "8.00%", "commited": "Y" },
-    { "serial_number": "6", "product_category": "Frozen", "pricing_frequency": "weekly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-    { "serial_number": "7a", "product_category": "Canned & Dry", "pricing_frequency": "monthly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-    { "serial_number": "7b", "product_category": "Bottled Water", "pricing_frequency": "monthly", "margin_fee_per_unit": "$2.50/case fee", "commited": "Y" },
-    { "serial_number": "8", "product_category": "Paper & Disposables", "pricing_frequency": "monthly", "margin_fee_per_unit": "8.00%", "commited": "Y" },
-    { "serial_number": "9a", "product_category": "Chemical/Janitorial", "pricing_frequency": "monthly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-    { "serial_number": "9b", "product_category": "Ecolab", "pricing_frequency": "monthly", "margin_fee_per_unit": "Per contract with Customer", "commited": "Y" },
-    { "serial_number": "10", "product_category": "Supplies & Equipment", "pricing_frequency": "monthly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-    { "serial_number": "11", "product_category": "Produce", "pricing_frequency": "monthly", "margin_fee_per_unit": "8.00%", "commited": "Y" },
-    { "serial_number": "12a", "product_category": "Dispenser Beverage", "pricing_frequency": "monthly", "margin_fee_per_unit": "10.00%", "commited": "Y" },
-    { "serial_number": "12b", "product_category": "Coke, Pepsi, Dr. Pepper, Starbucks", "pricing_frequency": "monthly", "margin_fee_per_unit": "Per contract with Customer", "commited": "Y" }
-  ]
+  "extracted_data": []
 }
 ```
 
-**Example B — Amendment Agreement (prose-based unit, no Schedule 1).**
-Note every fee field's evidence is `null` — the model must confirm absence
-in each named section rather than skip the check.
+Example 2 – Split rows
+```json
+[
+  {
+    "serial_number": "7a",
+    "product_category": "Canned & Dry",
+    "pricing_frequency": "monthly",
+    "margin_fee_per_unit": "10.00%",
+    "commited": "Y"
+  },
+  {
+    "serial_number": "7b",
+    "product_category": "Bottled Water",
+    "pricing_frequency": "monthly",
+    "margin_fee_per_unit": "$2.50/case fee",
+    "commited": "Y"
+  }
+]
+```
+
+Example 3 – Child SKU rows
+```json
+[
+  {
+    "serial_number": "2",
+    "product_category": "Dairy",
+    "pricing_frequency": "weekly",
+    "margin_fee_per_unit": "12.00%"
+  },
+  {
+    "serial_number": null,
+    "product_category": "7162276 Cheese Mozzarella",
+    "pricing_frequency": null,
+    "margin_fee_per_unit": "Block Tier #3"
+  }
+]
+```
+
+Example 4 – Amendment
 
 ```json
-{
-  "grounding": {
-    "contract_type": { "evidence": "AMENDMENT AGREEMENT TO MASTER DISTRIBUTION AGREEMENT", "value": "Amendment Agreement" },
-    "adjusted_cost": { "evidence": null, "value": null },
-    "annual_price_increase": { "evidence": null, "value": null },
-    "eci_increase": { "evidence": null, "value": null },
-    "cpi_increase": { "evidence": null, "value": null },
-    "off_day_delivery_fee": { "evidence": null, "value": null },
-    "split_case_fee": { "evidence": null, "value": null },
-    "restocking_fee": { "evidence": null, "value": null },
-    "customer_recalls_fee": { "evidence": null, "value": null },
-    "late_payment_fee": { "evidence": null, "value": null },
-    "non_electronic_order_fee": { "evidence": null, "value": null },
-    "non_ach_fee": { "evidence": null, "value": null },
-    "minimum_order_included": { "evidence": null, "value": "No" },
-    "margin_schedule_data": [
-      { "row_evidence": "the Fee Per Case... will be increased by an additional $0.50/case for all Product categories priced on a Fee Per Case basis", "serial_number": "1", "product_category": "All product categories", "pricing_frequency": null, "margin_fee_per_unit": "$0.50/case", "commited": null },
-      { "row_evidence": "the Tier 1 Fee Per Case is increased to $3.65", "serial_number": "2", "product_category": "Tier 1", "pricing_frequency": null, "margin_fee_per_unit": "$3.65/case", "commited": null },
-      { "row_evidence": "the Tier 2 Fee Per Case is increased to $4.10", "serial_number": "3", "product_category": "Tier 2", "pricing_frequency": null, "margin_fee_per_unit": "$4.10/case", "commited": null }
-    ]
-  },
-  "metadata": {
-    "contract_type": "Amendment Agreement",
-    "adjusted_cost": null,
-    "annual_price_increase": null,
-    "eci_increase": null,
-    "cpi_increase": null,
-    "off_day_delivery_fee": null,
-    "split_case_fee": null,
-    "restocking_fee": null,
-    "customer_recalls_fee": null,
-    "late_payment_fee": null,
-    "non_electronic_order_fee": null,
-    "non_ach_fee": null,
-    "minimum_order_included": "No",
-    "minimum_order_surcharge_table_order_size": [],
-    "minimum_order_surcharge_table_surcharge": []
-  },
-  "margin_schedule_data": [
-    { "serial_number": "1", "product_category": "All product categories", "pricing_frequency": null, "margin_fee_per_unit": "$0.50/case", "commited": null },
-    { "serial_number": "2", "product_category": "Tier 1", "pricing_frequency": null, "margin_fee_per_unit": "$3.65/case", "commited": null },
-    { "serial_number": "3", "product_category": "Tier 2", "pricing_frequency": null, "margin_fee_per_unit": "$4.10/case", "commited": null }
-  ]
-}
+[
+  {
+    "serial_number": "1",
+    "product_category": "Tier 1",
+    "pricing_frequency": null,
+    "margin_fee_per_unit": "$3.65/case",
+    "commited": null
+  }
+]
 ```
+
 
 ---
 
