@@ -2,6 +2,8 @@ set the schedule to wrapper.
 Also set the subreport id as a const in the web report wrapper.
 also destination should be html for report to show within the wrapper.
 
+Set the search query into web report, not the wrapper
+Set the delete logs query into web report 2
 
 note: we dont need pagination, because this runs daily after 365 days.
 only the files older than 365 days are captured.

@@ -1,0 +1,8 @@
+Full Text: Complex Query
+------------------------------------
+OTSubType:144
+AND OTCreateDate:<'%1'
+    
+Location:
+------------------------------------
+// margin schedule
