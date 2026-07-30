@@ -11,9 +11,12 @@
 
 <body>
     <h2>MSA Pricing - Set MSA Pricing categories</h2>
-    <div id="total-source-rows">
-        Total Nodes: [LL_REPTAG_TOTALSOURCEROWS /]
+    <div>
+        Total Rows: <span id="total-source-rows">
+            [LL_REPTAG_TOTALSOURCEROWS /]
+        </span>
     </div>
+
 
     <div id="run-controls">
         <label>
@@ -33,247 +36,264 @@
     <div id="run-status"></div>
     <pre id="run-summary"></pre>
 
-  
-<script>
-    (function () {
-        var PAGE_SIZE = 300;
-        var REPORT_ID = 35951189;
-        var DEFAULT_START_PAGE = 1;
-        var DEFAULT_MAX_RETRIES = 2;
 
-        var statusEl = document.getElementById("run-status");
-        var summaryEl = document.getElementById("run-summary");
-        var totalEl = document.getElementById("total-source-rows");
-        var startBtn = document.getElementById("start-btn");
-        var stopBtn = document.getElementById("stop-btn");
-        var resumePageEl = document.getElementById("resume-page");
-        var maxRetriesEl = document.getElementById("max-retries");
-        var totalRows = parseInt((totalEl && totalEl.textContent || "").trim(), 10);
-        var isRunning = false;
-        var stopRequested = false;
-        var activeCancelSource = null;
+    <script>
+        (function () {
+            var PAGE_SIZE = 300;
+            var REPORT_ID = parseInt("[LL_REPTAG_$SUB_WEBREPORT_ID /]", 10);
+            alert(REPORT_ID)
+            var DEFAULT_START_PAGE = 1;
+            var DEFAULT_MAX_RETRIES = 2;
 
-        function setStatus(message) {
-            if (statusEl) {
-                statusEl.textContent = message;
-            }
-        }
+            var statusEl = document.getElementById("run-status");
+            var summaryEl = document.getElementById("run-summary");
+            var totalEl = document.getElementById("total-source-rows");
+            var startBtn = document.getElementById("start-btn");
+            var stopBtn = document.getElementById("stop-btn");
+            var resumePageEl = document.getElementById("resume-page");
+            var maxRetriesEl = document.getElementById("max-retries");
+            var totalRows = parseInt((totalEl && totalEl.textContent || "").trim(), 10);
+            var isRunning = false;
+            var stopRequested = false;
+            var activeCancelSource = null;
 
-        function setSummary(message) {
-            if (summaryEl) {
-                summaryEl.textContent = message;
-            }
-        }
-
-        function updateControls(running) {
-            if (startBtn) {
-                startBtn.disabled = running;
-            }
-            if (stopBtn) {
-                stopBtn.disabled = !running;
-            }
-            if (resumePageEl) {
-                resumePageEl.disabled = running;
-            }
-            if (maxRetriesEl) {
-                maxRetriesEl.disabled = running;
-            }
-        }
-
-        function getConfig() {
-            var startPage = parseInt(resumePageEl ? resumePageEl.value : String(DEFAULT_START_PAGE), 10);
-            var maxRetries = parseInt(maxRetriesEl ? maxRetriesEl.value : String(DEFAULT_MAX_RETRIES), 10);
-
-            startPage = Number.isFinite(startPage) && startPage > 0 ? startPage : DEFAULT_START_PAGE;
-            maxRetries = Number.isFinite(maxRetries) && maxRetries >= 0 ? maxRetries : DEFAULT_MAX_RETRIES;
-
-            if (resumePageEl) {
-                resumePageEl.value = String(startPage);
-            }
-            if (maxRetriesEl) {
-                maxRetriesEl.value = String(maxRetries);
+            function setStatus(message) {
+                if (statusEl) {
+                    statusEl.textContent = message;
+                }
             }
 
-            return {
-                startPage: startPage,
-                maxRetries: maxRetries
-            };
-        }
-
-        function runPagedReport(config, done) {
-            if (!Number.isFinite(totalRows) || totalRows <= 0) {
-                setStatus("No rows to process.");
-                done();
-                return;
+            function setSummary(message) {
+                if (summaryEl) {
+                    summaryEl.textContent = message;
+                }
             }
 
-            var totalPages = Math.ceil(totalRows / PAGE_SIZE);
-            var failures = [];
-            var processedPages = 0;
-            var effectiveStartPage = Math.min(config.startPage, totalPages);
+            function hasValidReportId() {
+                if (Number.isFinite(REPORT_ID) && REPORT_ID > 0) {
+                    return true;
+                }
 
-            if (config.startPage > totalPages) {
-                setStatus("resumePage is greater than total pages. Nothing to run.");
-                setSummary("totalPages=" + totalPages + " | requested resumePage=" + config.startPage);
-                done();
-                return;
+                var message = "SUB_WEBREPORT_ID is not configured.";
+                setStatus(message);
+                setSummary("Set the SUB_WEBREPORT_ID constant before starting this wrapper report.");
+                alert(message);
+                return false;
             }
 
-            setStatus("Starting run: " + totalRows + " rows across " + totalPages + " page(s). Running from page " + effectiveStartPage + ".");
-            setSummary("config: pageSize=" + PAGE_SIZE + ", maxRetries=" + config.maxRetries + ", resumePage=" + effectiveStartPage);
+            function updateControls(running) {
+                if (startBtn) {
+                    startBtn.disabled = running;
+                }
+                if (stopBtn) {
+                    stopBtn.disabled = !running;
+                }
+                if (resumePageEl) {
+                    resumePageEl.disabled = running;
+                }
+                if (maxRetriesEl) {
+                    maxRetriesEl.disabled = running;
+                }
+            }
 
-            function processPage(page) {
-                if (page > totalPages) {
-                    if (failures.length > 0) {
-                        var failedPages = failures.map(function (f) { return f.page; });
-                        var nextResumePage = failedPages[0];
-                        setStatus("Completed with " + failures.length + " failed page(s). Successful pages: " + processedPages + ".");
-                        setSummary(
-                            "failedPages=" + failedPages.join(",") + "\n" +
-                            "resumeFromFirstFailed=" + nextResumePage + "\n" +
-                            "details=" + JSON.stringify(failures)
-                        );
-                    } else {
-                        setStatus("Completed successfully. Processed " + totalRows + " rows across " + totalPages + " page(s) from page " + effectiveStartPage + ".");
-                        setSummary("No failures.");
+            function getConfig() {
+                var startPage = parseInt(resumePageEl ? resumePageEl.value : String(DEFAULT_START_PAGE), 10);
+                var maxRetries = parseInt(maxRetriesEl ? maxRetriesEl.value : String(DEFAULT_MAX_RETRIES), 10);
+
+                startPage = Number.isFinite(startPage) && startPage > 0 ? startPage : DEFAULT_START_PAGE;
+                maxRetries = Number.isFinite(maxRetries) && maxRetries >= 0 ? maxRetries : DEFAULT_MAX_RETRIES;
+
+                if (resumePageEl) {
+                    resumePageEl.value = String(startPage);
+                }
+                if (maxRetriesEl) {
+                    maxRetriesEl.value = String(maxRetries);
+                }
+
+                return {
+                    startPage: startPage,
+                    maxRetries: maxRetries
+                };
+            }
+
+            function runPagedReport(config, done) {
+                if (!Number.isFinite(totalRows) || totalRows <= 0) {
+                    setStatus("No rows to process.");
+                    done();
+                    return;
+                }
+
+                var totalPages = Math.ceil(totalRows / PAGE_SIZE);
+                var failures = [];
+                var processedPages = 0;
+                var effectiveStartPage = Math.min(config.startPage, totalPages);
+
+                if (config.startPage > totalPages) {
+                    setStatus("resumePage is greater than total pages. Nothing to run.");
+                    setSummary("totalPages=" + totalPages + " | requested resumePage=" + config.startPage);
+                    done();
+                    return;
+                }
+
+                setStatus("Starting run: " + totalRows + " rows across " + totalPages + " page(s). Running from page " + effectiveStartPage + ".");
+                setSummary("config: pageSize=" + PAGE_SIZE + ", maxRetries=" + config.maxRetries + ", resumePage=" + effectiveStartPage);
+
+                function processPage(page) {
+                    if (page > totalPages) {
+                        if (failures.length > 0) {
+                            var failedPages = failures.map(function (f) { return f.page; });
+                            var nextResumePage = failedPages[0];
+                            setStatus("Completed with " + failures.length + " failed page(s). Successful pages: " + processedPages + ".");
+                            setSummary(
+                                "failedPages=" + failedPages.join(",") + "\n" +
+                                "resumeFromFirstFailed=" + nextResumePage + "\n" +
+                                "details=" + JSON.stringify(failures)
+                            );
+                        } else {
+                            setStatus("Completed successfully. Processed " + totalRows + " rows across " + totalPages + " page(s) from page " + effectiveStartPage + ".");
+                            setSummary("No failures.");
+                        }
+                        done();
+                        return;
                     }
-                    done();
-                    return;
-                }
 
-                if (stopRequested) {
-                    setStatus("Stopped by user at page " + page + " of " + totalPages + ".");
-                    setSummary("resume from: " + page + "\nprocessedPages=" + processedPages + "\nfailuresSoFar=" + JSON.stringify(failures));
-                    done();
-                    return;
-                }
-
-                var startAt = ((page - 1) * PAGE_SIZE) + 1;
-                var url = window.location.origin + "/otcs/cs.exe?func=ll&objId=" + REPORT_ID + "&objAction=RunReport&page=" + page + "&startAt=" + startAt;
-                setStatus("Running page " + page + " of " + totalPages + " (startAt=" + startAt + ")...");
-
-                function attemptRequest(attempt) {
                     if (stopRequested) {
-                        setStatus("Stopping requested. Ending run...");
+                        setStatus("Stopped by user at page " + page + " of " + totalPages + ".");
                         setSummary("resume from: " + page + "\nprocessedPages=" + processedPages + "\nfailuresSoFar=" + JSON.stringify(failures));
                         done();
                         return;
                     }
 
-                    if (attempt > 0) {
-                        setStatus("Retry " + attempt + " for page " + page + " of " + totalPages + "...");
-                    }
+                    var startAt = ((page - 1) * PAGE_SIZE) + 1;
+                    var url = window.location.origin + "/otcs/cs.exe?func=ll&objId=" + REPORT_ID + "&objAction=RunReport&page=" + page + "&startAt=" + startAt;
+                    setStatus("Running page " + page + " of " + totalPages + " (startAt=" + startAt + ")...");
 
-                    if (typeof axios === "undefined") {
-                        setStatus("Axios is not loaded.");
-                        setSummary("Unable to continue because axios library is unavailable.");
-                        done();
-                        return;
-                    }
-
-                    var requestSettled = false;
-                    activeCancelSource = axios.CancelToken.source();
-
-                    axios({
-                        method: "get",
-                        url: url,
-                        withCredentials: true,
-                        responseType: "text",
-                        headers: {
-                            "Accept": "text/html"
-                        },
-                        cancelToken: activeCancelSource.token
-                    }).then(function (response) {
-                        if (requestSettled) {
-                            return;
-                        }
-                        requestSettled = true;
-                        activeCancelSource = null;
-
-                        var status = response && response.status;
-
-                        if (status >= 200 && status < 300) {
-                            processedPages += 1;
-                            processPage(page + 1);
-                            return;
-                        }
-
-                        if (attempt < config.maxRetries) {
-                            attemptRequest(attempt + 1);
-                            return;
-                        }
-
-                        failures.push({ page: page, startAt: startAt, status: status || "network-error" });
-                        processPage(page + 1);
-                    }).catch(function (error) {
-                        if (requestSettled) {
-                            return;
-                        }
-                        requestSettled = true;
-                        activeCancelSource = null;
-
-                        if (axios.isCancel && axios.isCancel(error)) {
-                            setStatus("Stopped by user during request execution.");
+                    function attemptRequest(attempt) {
+                        if (stopRequested) {
+                            setStatus("Stopping requested. Ending run...");
                             setSummary("resume from: " + page + "\nprocessedPages=" + processedPages + "\nfailuresSoFar=" + JSON.stringify(failures));
                             done();
                             return;
                         }
 
-                        if (attempt < config.maxRetries) {
-                            attemptRequest(attempt + 1);
+                        if (attempt > 0) {
+                            setStatus("Retry " + attempt + " for page " + page + " of " + totalPages + "...");
+                        }
+
+                        if (typeof axios === "undefined") {
+                            setStatus("Axios is not loaded.");
+                            setSummary("Unable to continue because axios library is unavailable.");
+                            done();
                             return;
                         }
 
-                        failures.push({ page: page, startAt: startAt, status: "network-error" });
-                        processPage(page + 1);
-                    });
+                        var requestSettled = false;
+                        activeCancelSource = axios.CancelToken.source();
+
+                        axios({
+                            method: "get",
+                            url: url,
+                            withCredentials: true,
+                            responseType: "text",
+                            headers: {
+                                "Accept": "text/html"
+                            },
+                            cancelToken: activeCancelSource.token
+                        }).then(function (response) {
+                            if (requestSettled) {
+                                return;
+                            }
+                            requestSettled = true;
+                            activeCancelSource = null;
+
+                            var status = response && response.status;
+
+                            if (status >= 200 && status < 300) {
+                                processedPages += 1;
+                                processPage(page + 1);
+                                return;
+                            }
+
+                            if (attempt < config.maxRetries) {
+                                attemptRequest(attempt + 1);
+                                return;
+                            }
+
+                            failures.push({ page: page, startAt: startAt, status: status || "network-error" });
+                            processPage(page + 1);
+                        }).catch(function (error) {
+                            if (requestSettled) {
+                                return;
+                            }
+                            requestSettled = true;
+                            activeCancelSource = null;
+
+                            if (axios.isCancel && axios.isCancel(error)) {
+                                setStatus("Stopped by user during request execution.");
+                                setSummary("resume from: " + page + "\nprocessedPages=" + processedPages + "\nfailuresSoFar=" + JSON.stringify(failures));
+                                done();
+                                return;
+                            }
+
+                            if (attempt < config.maxRetries) {
+                                attemptRequest(attempt + 1);
+                                return;
+                            }
+
+                            failures.push({ page: page, startAt: startAt, status: "network-error" });
+                            processPage(page + 1);
+                        });
+                    }
+
+                    attemptRequest(0);
                 }
 
-                attemptRequest(0);
+                processPage(effectiveStartPage);
             }
 
-            processPage(effectiveStartPage);
-        }
+            function startRun() {
+                if (isRunning) {
+                    return;
+                }
 
-        function startRun() {
-            if (isRunning) {
-                return;
-            }
+                if (!hasValidReportId()) {
+                    return;
+                }
 
-            isRunning = true;
-            stopRequested = false;
-            updateControls(true);
-
-            runPagedReport(getConfig(), function () {
-                isRunning = false;
+                isRunning = true;
                 stopRequested = false;
-                activeCancelSource = null;
-                updateControls(false);
-            });
-        }
+                updateControls(true);
 
-        function stopRun() {
-            if (!isRunning) {
-                return;
+                runPagedReport(getConfig(), function () {
+                    isRunning = false;
+                    stopRequested = false;
+                    activeCancelSource = null;
+                    updateControls(false);
+                });
             }
-            stopRequested = true;
-            if (activeCancelSource) {
-                activeCancelSource.cancel("User stopped run");
+
+            function stopRun() {
+                if (!isRunning) {
+                    return;
+                }
+                stopRequested = true;
+                if (activeCancelSource) {
+                    activeCancelSource.cancel("User stopped run");
+                }
             }
-        }
 
-        if (startBtn) {
-            startBtn.addEventListener("click", startRun);
-        }
-        if (stopBtn) {
-            stopBtn.addEventListener("click", stopRun);
-        }
+            if (startBtn) {
+                startBtn.addEventListener("click", startRun);
+            }
+            if (stopBtn) {
+                stopBtn.addEventListener("click", stopRun);
+            }
 
-        setStatus("Ready. Configure values and click Start.");
-        setSummary("Default config: pageSize=" + PAGE_SIZE + ", maxRetries=" + DEFAULT_MAX_RETRIES + ", resumePage=" + DEFAULT_START_PAGE);
-    })();
+            setStatus("Ready. Configure values and click Start.");
+            setSummary("Default config: pageSize=" + PAGE_SIZE + ", maxRetries=" + DEFAULT_MAX_RETRIES + ", resumePage=" + DEFAULT_START_PAGE);
+        })();
 
-</script>
+    </script>
 
 </body>
 
