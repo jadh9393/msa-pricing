@@ -1,5 +1,15 @@
 [LL_WEBREPORT_STARTROW /]
-    [LL_REPTAG=DATAID /] 
-    [LL_REPTAG=DATAID CATACTION:ADD:"CLMTracking" /]
-    </br>
+    [LL_WEBREPORT_IF
+        "[LL_REPTAG_&category_name /]" == ""
+        OR
+        "[LL_REPTAG_&category_name /]" == "**Undefined constant**"
+        OR
+        "[LL_REPTAG_&category_name /]" == "**Undefined parameter**"
+    /]
+        category_name is not configured. </br>
+    [LL_WEBREPORT_ELSE /]
+        [LL_REPTAG=DATAID /] 
+        [LL_REPTAG=DATAID CATACTION:ADD:"[LL_REPTAG_&category_name /]" /]
+        </br>
+    [LL_WEBREPORT_ENDIF /]
 [LL_WEBREPORT_ENDROW /]

@@ -5,14 +5,17 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>MSA Pricing - Unprocessed Documents Report</title>
+    <title>MSA Pricing - Set MSA Pricing categories to MSA files</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.18.1/axios.min.js"></script>
 </head>
 
 <body>
+    <h2>MSA Pricing - Set MSA Pricing categories to MSA files</h2>
 
-    <div id="total-source-rows">
-        [LL_REPTAG_TOTALSOURCEROWS /]
+    <div>
+        Total Rows: <span id="total-source-rows">
+            [LL_REPTAG_TOTALSOURCEROWS /]
+        </span>
     </div>
 
     <div id="run-controls">
@@ -42,7 +45,8 @@
 <script>
     (function () {
         var PAGE_SIZE = 300;
-        var REPORT_ID = 35955741;
+        var REPORT_ID = parseInt("[LL_REPTAG_$SUB_WEBREPORT_ID /]", 10);
+        var CATEGORY_NAME = "[LL_REPTAG_$CATEGORY_NAME /]";
         var DEFAULT_START_PAGE = 1;
         var DEFAULT_MAX_RETRIES = 2;
         var DEFAULT_BATCH_SIZE = 5;
@@ -72,6 +76,34 @@
             if (summaryEl) {
                 summaryEl.textContent = message;
             }
+        }
+
+        function isMissingTagValue(value) {
+            var unresolvedTagPrefix = "[" + "LL_REPTAG_";
+            var trimmedValue = value.trim();
+            return trimmedValue === "" || trimmedValue.indexOf(unresolvedTagPrefix) !== -1 || trimmedValue.toLowerCase().indexOf("undefined constant") !== -1;
+        }
+
+        function hasRequiredConstants() {
+            var missingConstants = [];
+
+            if (!Number.isFinite(REPORT_ID) || REPORT_ID <= 0) {
+                missingConstants.push("SUB_WEBREPORT_ID");
+            }
+
+            if (isMissingTagValue(CATEGORY_NAME)) {
+                missingConstants.push("CATEGORY_NAME");
+            }
+
+            if (missingConstants.length === 0) {
+                return true;
+            }
+
+            var message = "Missing required constant(s): " + missingConstants.join(", ") + ".";
+            setStatus(message);
+            setSummary("Set the missing constant(s) before starting this wrapper report.");
+            alert(message);
+            return false;
         }
 
         function updateControls(running) {
@@ -190,7 +222,8 @@
 
             function runPageWithRetry(page, onComplete) {
                 var startAt = ((page - 1) * PAGE_SIZE) + 1;
-                var url = window.location.origin + "/otcs/cs.exe?func=ll&objId=" + REPORT_ID + "&objAction=RunReport&page=" + page + "&startAt=" + startAt;
+                var categoryName = encodeURIComponent(CATEGORY_NAME.trim());
+                var url = window.location.origin + "/otcs/cs.exe?func=ll&objId=" + REPORT_ID + "&objAction=RunReport&page=" + page + "&startAt=" + startAt + "&category_name=" + categoryName;
 
                 function attemptRequest(attempt) {
                     if (stopRequested) {
@@ -297,6 +330,10 @@
 
         function startRun() {
             if (isRunning) {
+                return;
+            }
+
+            if (!hasRequiredConstants()) {
                 return;
             }
 
