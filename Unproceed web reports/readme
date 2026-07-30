@@ -1,1 +1,5 @@
 Update web report nodeIds in each web report that is referred Ex: "&objId=35942940"
+
+Constants to be set in Filter Web report:
+JSON_WR_ID
+FAILED_DOCS_VIEW_WR_ID

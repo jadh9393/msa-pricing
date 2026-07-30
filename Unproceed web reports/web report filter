@@ -127,6 +127,44 @@
 
 <script>
 
+const JSON_WR_ID =
+    "[LL_REPTAG_$JSON_WR_ID /]";
+
+const FAILED_DOCS_VIEW_WR_ID =
+    "[LL_REPTAG_$FAILED_DOCS_VIEW_WR_ID /]";
+
+function validateConstants() {
+
+    const missing = [];
+
+    if (
+        !JSON_WR_ID 
+    ) {
+        missing.push("JSON_WR_ID");
+    }
+
+    if (
+        !FAILED_DOCS_VIEW_WR_ID 
+    ) {
+        missing.push("FAILED_DOCS_VIEW_WR_ID");
+    }
+
+    if (missing.length > 0) {
+
+        alert(
+            "Missing required WebReport constants(s):\n\n"
+            + missing.join("\n")
+        );
+
+        throw new Error(
+            "Missing required WebReport constants(s): "
+            + missing.join(", ")
+        );
+    }
+}
+
+validateConstants();
+
 function yyyymmddToDateInput(value) {
 
     if (!/^\d{8}$/.test(value || "")) {
@@ -267,12 +305,14 @@ document
         window.location.href =
             "cs.exe"
             + "?func=ll"
-            + "&objId=35944543"
+            + "&objId=" + encodeURIComponent(FAILED_DOCS_VIEW_WR_ID)
             + "&objAction=RunReport"
             + "&InputLabel1="
             + startFormatted
             + "&InputLabel2="
-            + endFormatted;
+            + endFormatted
+            + "&FilterWebReportId=" + "[LL_REPTAG_&objId /]"
+            + "&JsonDataWebReportId=" + encodeURIComponent(JSON_WR_ID);
 
     });
 
