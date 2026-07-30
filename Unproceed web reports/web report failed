@@ -207,7 +207,7 @@
 
             <input type="hidden" name="func" value="ll">
 
-            <input type="hidden" name="objId" value="35950584">
+            <input type="hidden" name="objId" value="[LL_REPTAG_&FilterWebReportId /]">
 
             <input type="hidden" name="objAction" value="RunReport">
 
@@ -604,7 +604,7 @@
 
                 var url =
                     "cs.exe?func=ll" +
-                    "&objId=35942940" +
+                    "&objId=[LL_REPTAG_&JsonDataWebReportId /]" +
                     "&objAction=RunReport" +
                     "&page=" + page +
                     "&startAt=" + startAt +
