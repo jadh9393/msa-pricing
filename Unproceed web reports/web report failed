@@ -399,7 +399,7 @@
                 window.location.href =
                     "cs.exe"
                     + "?func=ll"
-                    + "&objId=35944543"
+                    + "&objId=[LL_REPTAG_&objId /]"
                     + "&objAction=RunReport"
                     + "&page=" + page
                     + "&startAt=" + startAt
