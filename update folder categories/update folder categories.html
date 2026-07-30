@@ -1,10 +1,19 @@
 [/* Title: Blank Reportview */]
 
-<!--[LL_REPTAG_'31652474' CATACTION:SETVALUE:"CLMTracking":"MSA Pricing Status":"UNPROCESSED" /]-->
-<!--[LL_REPTAG_'31652474' CATACTION:SETVALUE:"CLMTracking":"MSA Pricing Status Note":"" /]-->
-
 [LL_WEBREPORT_STARTROW /]
-    [LL_REPTAG=DATAID /] 
-    [LL_REPTAG=DATAID CATACTION:ADD:"CLMTracking" /]
-    </br>
+    [LL_WEBREPORT_IF "[LL_REPTAG_&category_name /]" == "" /]
+        category_name is not configured.
+    [LL_WEBREPORT_ELSE /]
+        [LL_WEBREPORT_IF "[LL_REPTAG_&category_name /]" == "**Undefined constant**" /]
+            category_name is not configured.
+        [LL_WEBREPORT_ELSE /]
+            [LL_WEBREPORT_IF "[LL_REPTAG_&category_name /]" == "**Undefined parameter**" /]
+                category_name is not configured.
+            [LL_WEBREPORT_ELSE /]
+                [LL_REPTAG=DATAID /] 
+                [LL_REPTAG=DATAID CATACTION:ADD:"[LL_REPTAG_&category_name /]" /]
+                </br>
+            [LL_WEBREPORT_ENDIF /]
+        [LL_WEBREPORT_ENDIF /]
+    [LL_WEBREPORT_ENDIF /]
 [LL_WEBREPORT_ENDROW /]
