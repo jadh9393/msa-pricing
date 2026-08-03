@@ -2,7 +2,6 @@
 [LL_REPTAG_2 RMXREFINFO SETVAR:XREFS /]
 
 Document: [LL_REPTAG_2 /]
-
 [LL_WEBREPORT_FOR DATA:[LL_REPTAG_!XREFS /] VAR:xref /]
 [LL_REPTAG_%xref CURRENTVAL RECORD:DataID SETVAR:XREFID /]
 Associate: [LL_REPTAG_!XREFID /] ([LL_REPTAG_%xref CURRENTVAL RECORD:XRef /])
@@ -10,12 +9,12 @@ Associate: [LL_REPTAG_!XREFID /] ([LL_REPTAG_%xref CURRENTVAL RECORD:XRef /])
 [LL_REPTAG_!XREFID CATACTION:SETVALUE:"[LL_REPTAG_&InputCategory /]":"[LL_REPTAG_&InputAttribute /]":"[LL_REPTAG_&InputValue /]" /]
 [LL_REPTAG_DATETIME SETVAR:NOW /]
 
-Updated associate document at: [LL_REPTAG_!NOW /]
+Updated associate document categories at: [LL_REPTAG_!NOW /]
 [LL_WEBREPORT_ENDFOR /]
 
 Deleting Document: [LL_REPTAG_2 /]
 [LL_REPTAG_2 NODEACTION:DELETE /]
 
---------------------------------------------
+----------------------------------------------------------------------------------------------------------------
 
 [LL_WEBREPORT_ENDROW /]
