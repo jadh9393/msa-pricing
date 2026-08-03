@@ -1,17 +1,19 @@
-Running the cleanup web report for excel files created more than 365 days ago<br>
+Running the cleanup web report for excel files created more than [LL_REPTAG_$DAYS_AGO /] days ago<br>
 
-[LL_REPTAG_DATE DATEDEC:365:DAYS DATE:"%Y%m%d" SETVAR:ENDDATE /]
+[LL_REPTAG_DATE DATEDEC:[LL_REPTAG_$DAYS_AGO /]:DAYS DATE:"%Y%m%d" SETVAR:ENDDATE /]
 
-365 Days Ago:
+[LL_REPTAG_$DAYS_AGO /] Days Ago:
 [LL_REPTAG_!ENDDATE /]<br>
 
-<!-- we are selecting all margin schedule excel files created before the day which is 365 days earlier from today -->
-
+<!-- we are selecting all margin schedule excel files created before the configured day offset from today -->
+==============================================================================================================
 Sub Report ID for MSA Excel deletion( Set as a const in webreport ):
 [LL_REPTAG_$SUB_WEBREPORT_ID /]<br>
+Deleting MSA Excel files created before [LL_REPTAG_$DAYS_AGO /] days ago:<br>
+[LL_WEBREPORT_SUBWEBREPORT NODEID:[LL_REPTAG_$SUB_WEBREPORT_ID /] PARM:InputLabel1:[LL_REPTAG_!ENDDATE /] PARM:InputCategory:[LL_REPTAG_$INPUT_CATEGORY /] PARM:InputAttribute:[LL_REPTAG_$INPUT_ATTRIBUTE /] PARM:InputValue:[LL_REPTAG_$INPUT_VALUE /] /]
 
+==============================================================================================================
 Sub report id for log file deletion( Set as a const in webreport ):
 [LL_REPTAG_$SUB_WEBREPORT_LOG_ID /]<br>
-
-[LL_WEBREPORT_SUBWEBREPORT NODEID:[LL_REPTAG_$SUB_WEBREPORT_ID /] PARM:InputLabel1:[LL_REPTAG_!ENDDATE /] /]
+Deleting log files created before [LL_REPTAG_$DAYS_AGO /] days ago:<br>
 [LL_WEBREPORT_SUBWEBREPORT NODEID:[LL_REPTAG_$SUB_WEBREPORT_LOG_ID /] PARM:InputLabel1:[LL_REPTAG_!ENDDATE /] /]

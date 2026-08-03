@@ -10,8 +10,10 @@ only the files older than 365 days are captured.
 we dont get 300 documents daily
 
 constants to be set in Wrapper:
+DAYS_AGO
 SUB_WEBREPORT_ID
 SUB_WEBREPORT_LOG_ID
 INPUT_CATEGORY
 INPUT_ATTRIBUTE
 INPUT_VALUE
+
