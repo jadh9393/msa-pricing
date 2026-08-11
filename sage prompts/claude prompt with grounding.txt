@@ -789,7 +789,18 @@ Example 4 – Amendment
 
 ## 10. OUTPUT RULES
 
-- Return valid JSON only — no explanation outside the JSON.
+FINAL CHECK BEFORE RESPONDING
+
+Before producing your response:
+
+1. Verify the JSON parses successfully.
+2. Verify every opening { has a matching }.
+3. Verify every opening [ has a matching ].
+4. Verify there are no trailing commas.
+5. Verify every object matches the output schema.
+6. If validation fails, regenerate the JSON before responding.
+
+Output ONLY the final JSON.
 - Do not hallucinate or infer values not explicitly visible in the source
   text, even if a value would be "reasonable."
 - When genuinely uncertain between two candidate values for one field,

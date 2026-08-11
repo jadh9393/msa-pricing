@@ -1,0 +1,21 @@
+Lifecycle web report/ Delete margin schedule data:
+    WR_OTCS_MSAPricingExcelFileDeleteScheduler_Docs
+    * INPUT_CATEGORY
+
+
+
+Failed Files:
+
+    SQ_OTCS_LCC_MSAFetchFailedDocuments_NodeIDs
+    (
+    Attr_35927465_2:"PROCESSING_FAILED"
+    OR
+    Attr_35927465_2:"INGESTION_FAILED"
+    )
+
+    *Attr_ id should change to Doc intelligence props one
+
+
+Trigger for status category update:
+    *CONDITION_CATEGORY_NAME
+    *UPDATE_CATEGORY_NAME
