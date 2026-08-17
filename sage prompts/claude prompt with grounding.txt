@@ -404,7 +404,8 @@ Covered in Section 3 above.
 ### `minimum_order_included`
 - **Source:** anywhere in the unit.
 - **Trigger:** "Smallest delivery Sysco is obligated to make."
-- Found → `"Yes"`; not found → `"No"`. Never `null`.
+- Default Value -> `"No"`
+- If found only → `"Yes"`. Never `null`.
 
 ### `minimum_order_surcharge_table_order_size` / `..._surcharge`
 - Only populate if `minimum_order_included = "Yes"`.
@@ -541,7 +542,7 @@ Extraction rules:
 - If the child row contains its own Margin/Fee value, extract it exactly.
 - If Pricing Frequency is visually blank, return `null`.
 - If Committed checkbox is visually blank/not explicitly repeated, return `null`.
-- Never inherit `pricing_frequency`, `commited`, or `margin_fee_per_unit`
+- Never inherit `pricing_frequency`, or `margin_fee_per_unit`
   from the parent row unless those values are visibly present on the child row.
 
 Child SKU rows are different from split rows because they are not lettered
@@ -551,10 +552,10 @@ Child SKU rows are different from split rows because they are not lettered
 [
   {
     "serial_number": "2",
-    "product_category": "Dairy",
+    "product_category": "sample_category",
     "pricing_frequency": "weekly",
     "margin_fee_per_unit": "12.00%",
-    "commited": "Y"
+    "commited": "Yes"
   },
   {
     "serial_number": null,
@@ -566,20 +567,6 @@ Child SKU rows are different from split rows because they are not lettered
   {
     "serial_number": null,
     "product_category": "2856108 Cheese Mozzarella Wm Shrd Prem",
-    "pricing_frequency": null,
-    "margin_fee_per_unit": "Block Tier #3",
-    "commited": null
-  },
-  {
-    "serial_number": null,
-    "product_category": "7100616 Cheese Mozzarella Sliced",
-    "pricing_frequency": null,
-    "margin_fee_per_unit": "Block Tier #3",
-    "commited": null
-  },
-  {
-    "serial_number": null,
-    "product_category": "7281615 Cheese Mozz Lmps Sli",
     "pricing_frequency": null,
     "margin_fee_per_unit": "Block Tier #3",
     "commited": null
@@ -662,12 +649,11 @@ pricing categories.
 
 - **Checkbox handling:** `commited` should only be populated when a Yes/No selection is visibly
   present on that exact row.
-
+  Return "Yes" only if the checkbox is selected.
   If a lettered sub-row or child row does not display its own checkbox
-  selection, then:
+  selection, then check if "margin_fee_per_unit" is equal to "Per contract with Customer"
+  then return "No", else inherit from the parent
 
-  ```json
-  "commited": null
 
 - **Non-numeric margin values** ("Block Tier #3," "Per contract with
   Customer") are valid values — preserve exactly, do not convert to `null`.
@@ -740,14 +726,14 @@ Example 2 – Split rows
     "product_category": "Canned & Dry",
     "pricing_frequency": "monthly",
     "margin_fee_per_unit": "10.00%",
-    "commited": "Y"
+    "commited": "Yes"
   },
   {
     "serial_number": "7b",
     "product_category": "Bottled Water",
     "pricing_frequency": "monthly",
     "margin_fee_per_unit": "$2.50/case fee",
-    "commited": "Y"
+    "commited": "Yes"
   }
 ]
 ```
