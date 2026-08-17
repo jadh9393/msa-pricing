@@ -94,7 +94,7 @@ fix Stage 1, don't patch Stage 2 directly.
 **Standardization (applies to every field above):**
 - Missing values → JSON `null` (never the string `"null"`, never `""`).
 - `contract_type` is the one field that must never be null — see its rule below.
-- `minimum_order_included` is never null — it is always `"Yes"` or `"No"`.
+- `minimum_order_included` is never null — it is always `"No"` or `"Yes"`.
 - `document_status.rejection_reason` is `""` only when `accepted = true`.
 - `extracted_data` is always an array, even for a single unit.
 - `margin_schedule_data` is always an array; one object per row, including
@@ -555,7 +555,7 @@ Child SKU rows are different from split rows because they are not lettered
     "product_category": "sample_category",
     "pricing_frequency": "weekly",
     "margin_fee_per_unit": "12.00%",
-    "commited": "Yes"
+    "commited": "No"
   },
   {
     "serial_number": null,
@@ -649,7 +649,11 @@ pricing categories.
 
 - **Checkbox handling:** `commited` should only be populated when a Yes/No selection is visibly
   present on that exact row.
-  Return "Yes" only if the checkbox is selected.
+  If BOTH the Yes checkbox AND the No checkbox are empty/unmarked,
+   return `null`.
+  Return `"No"` ONLY when the checkbox immediately following `No` is selected
+  Return `"Yes"` ONLY when the checkbox immediately following `Yes` is selected
+
   If a lettered sub-row or child row does not display its own checkbox
   selection, then check if "margin_fee_per_unit" is equal to "Per contract with Customer"
   then return "No", else inherit from the parent
