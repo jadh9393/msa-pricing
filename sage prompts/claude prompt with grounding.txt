@@ -517,172 +517,151 @@ Examples:
 
 - "1.5% interest and $25 returned check fee"
   → "1.5%; $25"
----
+--------------------------------------------------------------------------------------------
 
 ## 7. MARGIN SCHEDULE TABLE PARSING
 
-Parse Schedule 1 row-by-row, exactly as laid out.
+Parse the Margin Schedule from top to bottom and create one output object for
+every visible category, lettered sub-item, and unlettered detail/SUPC line.
+Preserve the visual order of all rows.
 
-### Two sub-row patterns — check which one applies before extracting
+### 7.1 Null is the default
 
-### A. Child SKU / Detail rows (not split rows)
+Start every row with all five fields set to JSON `null`. Populate a field only
+when its value is visibly present on that row or an explicit rule below permits
+inheritance. Never output the string `"Null"`, an empty string, or a guessed
+value.
 
-The sub-line is an unlettered product description or SKU beneath a parent
-category.
+The only permitted inheritance in this section is for `commited`. Never inherit
+`pricing_frequency` or `margin_fee_per_unit`.
 
-Rules:
+### 7.2 Classify each visual line before extracting it
 
-- Every child SKU line must be extracted as its own row object.
-- Child rows never receive their own serial number.
+Classify each line as exactly one of these row types:
 
-Extraction rules:
+1. **Top-level row**
+   - A numbered category with no letter marker, such as `3. Meats`.
+   - Use the visible number as `serial_number`, for example `"3"`.
 
-- `serial_number = null`
-- `product_category` = exact child SKU text.
-- If the child row contains its own Margin/Fee value, extract it exactly.
-- If Pricing Frequency is visually blank, return `null`.
-- If Committed checkbox is visually blank/not explicitly repeated, return parent value.
-- Never inherit `pricing_frequency`, or `margin_fee_per_unit`
-  from the parent row unless those values are visibly present on the child row.
+2. **Lettered sub-row**
+   - A category explicitly marked `a)`, `b)`, `c)`, etc.
+   - It is an independent margin-schedule row even when one or more of its
+     value cells are blank.
+   - Combine the group's number and lowercase letter: `7. a)` becomes `"7a"`;
+     the following `b)` becomes `"7b"`.
+   - A group containing only `a)` still uses the letter, for example `6. a)
+     Frozen` becomes `"6a"`. Do not simplify it to `"6"`.
+   - Never output only `"a"`, `"b"`, or `"c"`.
 
-Child SKU rows are different from split rows because they are not lettered
-(a, b, c...) and do not represent independent pricing categories.
-Example:
-```json
-[
-  {
-    "serial_number": "2",
-    "product_category": "sample_category",
-    "pricing_frequency": "weekly",
-    "margin_fee_per_unit": "12.00%",
-    "commited": "No"
-  },
-  {
-    "serial_number": null,
-    "product_category": "7162276 Cheese Mozz Shred Whl Milk",
-    "pricing_frequency": null,
-    "margin_fee_per_unit": "Block Tier #3",
-    "commited": "No"
-  },
-  {
-    "serial_number": null,
-    "product_category": "2856108 Cheese Mozzarella Wm Shrd Prem",
-    "pricing_frequency": null,
-    "margin_fee_per_unit": "Block Tier #3",
-    "commited": "No"
-  }
-]
+3. **Unlettered child/detail row**
+   - An indented, unnumbered, and unlettered description beneath a top-level or
+     lettered row, including SKU and SUPC lines.
+   - Extract every such line as a separate object.
+   - Set `serial_number` to JSON `null`.
+   - The nearest preceding top-level or lettered row is its parent.
+
+Do not decide row type from whether Pricing Frequency, Margin/Fee, or checkbox
+cells are filled. Numbering, letter markers, indentation, and visual grouping
+control the classification.
+
+### 7.3 Serial numbering when numbers are not printed
+
+If the table has no explicit serial-number column, assign group numbers by
+counting top-level groups from top to bottom, starting at `"1"`.
+
+- A normal top-level row receives the generated number.
+- Lettered rows receive the generated group number plus their letter.
+- Unlettered child/detail rows still receive `null`.
+
+Example: `Healthcare` -> `"1"`, `Dairy` -> `"2"`, `a) Frozen` in the third
+group -> `"3a"`, and `b) Frozen Lobster Meat` -> `"3b"`.
+
+### 7.4 Extract the row fields
+
+For each classified row:
+
+- `serial_number`: apply Sections 7.2 and 7.3.
+- `product_category`: copy the category or detail text from that visual line.
+  Remove its leading serial number or letter marker, any category footnote
+  marker, and a trailing period. Preserve the remaining wording, punctuation,
+  SKU/SUPC identifier, and capitalization.
+- `pricing_frequency`: copy the value visibly aligned with that exact row. If
+  the cell is blank, use `null`. Do not copy a frequency from a parent,
+  sibling, merged cell, previous row, or neighboring row.
+- `margin_fee_per_unit`: copy the complete value visibly aligned with that
+  exact row. If the cell is blank, use `null`. Preserve numeric and non-numeric
+  values exactly, including `MKT`, `Market`, `Block Tier #3`,
+  `$0.20/fee per LB`, `$2.50/case fee`, and `Per contract with Customer`.
+  Do not copy a margin from another row.
+- `commited`: apply Section 7.5 in its stated precedence order.
+
+### 7.5 `commited` extraction and precedence
+
+Apply these rules in order for each row:
+
+1. **Checkbox visibly assigned to the row:**
+   - Yes checked and No unchecked -> `"Yes"`.
+   - No checked and Yes unchecked -> `"No"`.
+   - Neither checked -> `null`.
+   - Never treat an empty No checkbox as `"No"`.
+
+2. **`Per contract with Customer` exception:**
+   If a sub-row has no checkbox of its own and its `margin_fee_per_unit` is
+   `Per contract with Customer`, set `commited` to `"No"`. This overrides a
+   checked Yes box governing the surrounding group.
+
+3. **Shared group checkbox for a lettered sub-row:**
+   If a lettered sub-row has no checkbox of its own, use the checkbox visibly
+   governing its numbered group. Inherit `"Yes"` or `"No"` only when that box
+   is checked; if neither group box is checked, use `null`.
+
+4. **Unlettered child/detail row:**
+   If the child has no checkbox of its own, inherit `commited` from its nearest
+   parent row. The inherited value may be `"Yes"`, `"No"`, or `null`.
+
+5. **No applicable evidence:**
+   Use `null`.
+
+### 7.6 Required interpretation examples
+
+```text
+7. a) Canned & Dry       monthly   8%                  Yes checked
+   b) Bottled Water      monthly   $2.50/case fee      no own checkbox
 ```
 
-**B. Split rows (own values, do not inherit):** the sub-line is lettered
-(a, b, c...) and **has its own value filled in** on its own visual line for
-Pricing Frequency and/or Margin/Fee. In this case each sub-row keeps its own
-column-aligned values — do not copy one sub-row's value into another's.
+Extract `7a` and `7b` as separate rows. Both have `commited = "Yes"` because
+the checked Yes box governs the group.
 
+```text
+9. a) Chemical/Janitorial   monthly   9.00%                       neither checked
+   b) Ecolab                [blank]   Per contract with Customer  no own checkbox
 ```
-7. a) Canned & Dry     monthly   10.00%
-   b) Bottled Water    monthly   $2.50/case fee
+
+Extract `9a` with `commited = null`. Extract `9b` with
+`pricing_frequency = null` and `commited = "No"` because the Per-contract
+exception applies.
+
+```text
+3. Meats                    weekly   5.50%             Yes checked
+   All Meats Catchweight Items       $0.20/fee per LB
 ```
-→ two independent rows, serial numbers `"7a"` and `"7b"`, each keeping its
-own `margin_fee_per_unit`.
 
-**The test:** does the sub-line show its own value in the value columns?
-Yes → split row (B). No, cell is empty/merged → child row (A).
+Extract the child row with `serial_number = null`, `pricing_frequency = null`,
+its own margin `$0.20/fee per LB`, and inherited `commited = "Yes"`.
 
-### Other table rules
-- **Split-row numbering:** append lowercase letters in visual order (7a,
-  7b), not new serial numbers.
+### 7.7 Final row check
 
--  ***Implicit serial numbering
+Before adding each object to `margin_schedule_data`, verify:
 
-Some Margin Schedule tables do not contain an explicit serial-number column.
+- Every visible top-level, lettered, and unlettered detail line was extracted
+  exactly once.
+- Lettered rows have a combined serial such as `7a`, `7b`, `9a`, or `12b`.
+- Only unlettered child/detail rows have `serial_number = null`.
+- Blank values are JSON `null` unless the `commited` rules explicitly permit
+  inheritance or require `"No"` for `Per contract with Customer`.
+- No frequency or margin was inherited from another row.
 
-In such cases:
-
-1. Generate serial numbers by counting top-level rows from top to bottom,
-   beginning with `"1"`.
-
-2. Any visually grouped or lettered sub-rows
-   (`a)`, `b)`, `c)`, etc.)
-   inherit the most recent top-level row number.
-
-Examples:
-
-Healthcare
-→ `"1"`
-
-Dairy
-→ `"2"`
-
-Meats
-→ `"3"`
-
-a) Seafood
-→ `"3a"`
-
-b) Frozen Lobster Meat
-→ `"3b"`
-
-c) Fresh Crab Meat
-→ `"3c"`
-
-Poultry
-→ `"4"`
-
-a) Frozen
-→ `"4a"`
-
-b) Mozzarella Cheese Sticks
-→ `"4b"`
-
-Never output:
-- `"a"`
-- `"b"`
-- `"c"`
-- `null`
-
-for lettered rows when the parent row can be identified.
-
-Only output `serial_number = null`
-for true child SKU/detail rows that are not lettered and are not independent
-pricing categories.
-
-- **Checkbox handling:** `commited` should only be populated when a Yes/No selection is visibly
-  present on that exact row.
-  If BOTH the Yes checkbox AND the No checkbox are empty/unmarked,
-   return `null`.
-  Return `"No"` ONLY when the checkbox immediately following `No` is marked clearly and you can 100% confirm
-  Return `"Yes"` ONLY when the checkbox immediately following `Yes` is marked clearly and you can 100% confirm
-
-  If a lettered sub-row or child row does not display its own checkbox
-  selection, then check if "margin_fee_per_unit" is equal to "Per contract with Customer"
-  then return "No", else inherit from the parent
-
-
-- **Non-numeric margin values** ("Block Tier #3," "Per contract with
-  Customer") are valid values — preserve exactly, do not convert to `null`.
-- **Footnote stripping:** remove superscripts/footnote markers from
-  category labels ("Dairy³" → "Dairy").
-- **Product category text:** capture exactly as written, preserve
-  alphanumeric numbering (7a, 12b), strip trailing periods.
-
----
-### Value inheritance rules
-
-For every row object:
-
-- `pricing_frequency` is populated only if visibly present on that row.
-- `margin_fee_per_unit` is populated only if visibly present on that row.
-
-Blank cells remain `null`.
-
-Never inherit values from parent rows, grouped rows, merged cells,
-previous rows, or neighboring rows.
-
-The only exception is when the document explicitly repeats the value
-across the grouped rows in a way that makes the value visibly applicable
-to that exact row.
-
+----------------------------------------------------------------------------------------
 ## 8. AMENDMENT CLAUSE EXTRACTION (no Schedule 1 table present)
 
 If an Amendment changes pricing through prose only:
