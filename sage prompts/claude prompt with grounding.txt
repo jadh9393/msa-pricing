@@ -541,13 +541,13 @@ Extraction rules:
 - `product_category` = exact child SKU text.
 - If the child row contains its own Margin/Fee value, extract it exactly.
 - If Pricing Frequency is visually blank, return `null`.
-- If Committed checkbox is visually blank/not explicitly repeated, return `null`.
+- If Committed checkbox is visually blank/not explicitly repeated, return parent value.
 - Never inherit `pricing_frequency`, or `margin_fee_per_unit`
   from the parent row unless those values are visibly present on the child row.
 
 Child SKU rows are different from split rows because they are not lettered
 (a, b, c...) and do not represent independent pricing categories.
-
+Example:
 ```json
 [
   {
@@ -562,14 +562,14 @@ Child SKU rows are different from split rows because they are not lettered
     "product_category": "7162276 Cheese Mozz Shred Whl Milk",
     "pricing_frequency": null,
     "margin_fee_per_unit": "Block Tier #3",
-    "commited": null
+    "commited": "No"
   },
   {
     "serial_number": null,
     "product_category": "2856108 Cheese Mozzarella Wm Shrd Prem",
     "pricing_frequency": null,
     "margin_fee_per_unit": "Block Tier #3",
-    "commited": null
+    "commited": "No"
   }
 ]
 ```
@@ -651,8 +651,8 @@ pricing categories.
   present on that exact row.
   If BOTH the Yes checkbox AND the No checkbox are empty/unmarked,
    return `null`.
-  Return `"No"` ONLY when the checkbox immediately following `No` is selected
-  Return `"Yes"` ONLY when the checkbox immediately following `Yes` is selected
+  Return `"No"` ONLY when the checkbox immediately following `No` is marked clearly and you can 100% confirm
+  Return `"Yes"` ONLY when the checkbox immediately following `Yes` is marked clearly and you can 100% confirm
 
   If a lettered sub-row or child row does not display its own checkbox
   selection, then check if "margin_fee_per_unit" is equal to "Per contract with Customer"
@@ -673,7 +673,6 @@ For every row object:
 
 - `pricing_frequency` is populated only if visibly present on that row.
 - `margin_fee_per_unit` is populated only if visibly present on that row.
-- `commited` is populated only if visibly present on that row.
 
 Blank cells remain `null`.
 
